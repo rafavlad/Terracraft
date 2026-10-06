@@ -1,4 +1,4 @@
-# Picareta & Montanha
+# Terracraft
 
 Jogo 2D de mineração e progressão (pixel art), em HTML + CSS + JavaScript puro — sem build, sem dependências de servidor.
 

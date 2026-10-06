@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Picareta &amp; Montanha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game-root">
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div class="hud-panel" id="money-box">
+      <span class="pixel-font">R$</span><span id="money-val">0</span>
+    </div>
+    <div class="hud-panel" id="stats-box">
+      <div class="row"><span class="label">PICARETA</span></div>
+      <div id="pick-name">Madeira</div>
+      <div class="row"><span class="label">PROFUNDIDADE</span><span id="depth-val">0m</span></div>
+      <div class="row"><span class="label">DRONES (MÁX. 40)</span><span id="drone-val">0/40</span></div>
+      <div id="drone-activity"></div>
+    </div>
+  </div>
+
+  <div id="inv-panel">
+    <h3>INVENTÁRIO</h3>
+    <div id="inv-list"></div>
+    <div id="inv-total">10/10</div>
+  </div>
+
+  <div id="surface-btn">VOLTAR À<br>SUPERFÍCIE</div>
+  <div id="menu-btn">☰<br>MENU</div>
+  <div id="hint">Setas/A-D: mover · Espaço: pular · Clique: minerar · E: interagir</div>
+  <div id="toast"></div>
+
+  <div id="joystick-wrap">
+    <div id="dpad">
+      <div class="touch-btn" id="btn-left">◀</div>
+      <div class="touch-btn" id="btn-right">▶</div>
+      <div class="touch-btn" id="jumpbtn">▲</div>
+    </div>
+    <div class="touch-btn" id="minebtn">⛏</div>
+  </div>
+
+  <!-- BANCADA DE MELHORIAS -->
+  <div class="overlay" id="shop-overlay">
+    <div class="modal-panel">
+      <h2>BANCADA DE MELHORIAS</h2>
+      <div class="money-line">Seu saldo: R$ <span id="shop-money-val">0</span></div>
+      <div class="tabs-row" id="shop-tabs">
+        <div class="tab-btn active" data-tab="pick">⛏ PICARETA</div>
+        <div class="tab-btn" data-tab="bag">🎒 BOLSA</div>
+        <div class="tab-btn" data-tab="inv">📈 INVESTIMENTO</div>
+      </div>
+      <div id="shop-list"></div>
+      <button class="modal-btn btn-red" id="shop-close">FECHAR (E)</button>
+    </div>
+  </div>
+
+  <!-- BANCADA DE MÁQUINAS -->
+  <div class="overlay" id="machines-overlay">
+    <div class="modal-panel">
+      <h2>BANCADA DE MÁQUINAS</h2>
+      <div class="money-line">Seu saldo: R$ <span id="machines-money-val">0</span></div>
+      <div class="tabs-row" id="machines-tabs">
+        <div class="tab-btn active" data-mtab="drones">🤖 DRONES</div>
+        <div class="tab-btn" data-mtab="speed">⚡ VELOCIDADE</div>
+        <div class="tab-btn" data-mtab="cap">📦 CAPACIDADE</div>
+      </div>
+      <div id="machines-list"></div>
+      <button class="modal-btn btn-red" id="machines-close">FECHAR (E)</button>
+    </div>
+  </div>
+
+  <!-- BANCADA DE ENCANTAMENTOS -->
+  <div class="overlay" id="enchant-overlay">
+    <div class="modal-panel">
+      <h2>BANCADA DE ENCANTAMENTOS</h2>
+      <div class="money-line">Seu saldo: R$ <span id="enchant-money-val">0</span></div>
+      <div class="tabs-row" id="enchant-tabs">
+        <div class="tab-btn active" data-etab="eff">🔥 EFICIÊNCIA</div>
+        <div class="tab-btn" data-etab="loot">🍀 LOOTING</div>
+      </div>
+      <div id="enchant-list"></div>
+      <button class="modal-btn btn-red" id="enchant-close">FECHAR (E)</button>
+    </div>
+  </div>
+
+  <!-- TRITURADOR -->
+  <div class="overlay" id="trit-overlay">
+    <div class="modal-panel">
+      <h2>TRITURADOR</h2>
+      <div id="trit-list"></div>
+      <div id="trit-total-line"></div>
+      <button id="trit-confirm">TRITURAR</button>
+      <button class="modal-btn btn-red" id="trit-close">FECHAR (E)</button>
+    </div>
+  </div>
+
+  <!-- MAIN MENU -->
+  <div id="main-menu">
+    <div class="menu-pick-deco">⛏️</div>
+    <div class="title">PICARETA &amp;<br>MONTANHA</div>
+    <div class="subtitle">uma aventura de mineração e progressão</div>
+    <button class="menu-btn" id="btn-new-game">NOVO JOGO</button>
+    <button class="menu-btn" id="btn-continue">CONTINUAR</button>
+    <button class="menu-btn" id="btn-save">SALVAR JOGO</button>
+    <button class="menu-btn" id="btn-settings">CONFIGURAÇÕES</button>
+    <button class="menu-btn" id="btn-controls">CONTROLES</button>
+    <button class="menu-btn" id="btn-exit">SAIR</button>
+  </div>
+
+  <!-- INTRO -->
+  <div class="overlay" id="intro-overlay">
+    <div class="modal-panel">
+      <h2>UMA PROPOSTA INESPERADA</h2>
+      <p>Em uma bela manhã, você estava tranquilamente em sua casa quando, de repente, <b>MrBeast</b> bateu na sua porta.</p>
+      <p>Ele perguntou: <i>"Você gostaria de ganhar 100 milhões de reais?"</i></p>
+      <p>Você respondeu: <i>"Obviamente que sim!"</i></p>
+      <p>Então ele explicou que havia apenas uma condição: você precisa quebrar essa montanha inteira. Inteira. Todos os blocos.</p>
+      <p>Então você pegou sua picareta e começou a trabalhar.</p>
+      <button class="modal-btn btn-green" id="intro-start">COMEÇAR A CAVAR</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="overlay" id="settings-overlay">
+    <div class="modal-panel">
+      <h2>CONFIGURAÇÕES</h2>
+      <label><input type="checkbox" id="toggle-touch" checked> Mostrar controles de toque</label>
+      <p style="font-size:14px;color:#c7a97a;text-align:center;">Mais opções em breve.</p>
+      <button class="modal-btn btn-red" id="settings-close">VOLTAR</button>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="overlay" id="controls-overlay">
+    <div class="modal-panel">
+      <h2>CONTROLES</h2>
+      <ul>
+        <li>Setas / A-D: mover para os lados</li>
+        <li>Espaço / W / seta pra cima: pular</li>
+        <li>Clique/toque segurando perto de um bloco: minerar</li>
+        <li>E: interagir com as bancadas, triturador e baús</li>
+        <li>Botão "Voltar à Superfície": retorna à base instantaneamente</li>
+      </ul>
+      <button class="modal-btn btn-red" id="controls-close">VOLTAR</button>
+    </div>
+  </div>
+
+  <!-- VICTORY -->
+  <div class="overlay" id="victory-overlay">
+    <div class="modal-panel">
+      <h1>VOCÊ QUEBROU A MONTANHA INTEIRA!</h1>
+      <p>MrBeast vai adorar isso. Você atravessou a Pedra Escura e chegou às Profundezas, no fundo do mundo.<br>
+      Dinheiro total: <b>R$ <span id="victory-money">0</span></b><br>
+      Blocos minerados: <b><span id="victory-blocks">0</span></b></p>
+      <p style="font-size:14px;color:#c7a97a;">Continue jogando — ainda há diamantes das Profundezas, baús raros e melhorias para buscar.</p>
+      <button class="modal-btn btn-green" id="victory-close">CONTINUAR MINERANDO</button>
+    </div>
+  </div>
+
+  <!-- PAUSE / MENU (in-game) -->
+  <div class="overlay" id="pause-overlay">
+    <div class="modal-panel">
+      <h2>MENU</h2>
+      <button class="menu-btn" id="pause-newgame" style="font-size:12px;padding:12px 20px;">NOVO JOGO</button>
+      <button class="menu-btn" id="pause-continue" style="font-size:12px;padding:12px 20px;">CONTINUAR</button>
+      <button class="menu-btn" id="pause-save" style="font-size:12px;padding:12px 20px;">SALVAR JOGO</button>
+      <button class="menu-btn" id="pause-settings" style="font-size:12px;padding:12px 20px;">CONFIGURAÇÕES</button>
+      <button class="menu-btn" id="pause-controls" style="font-size:12px;padding:12px 20px;">CONTROLES</button>
+      <button class="menu-btn" id="pause-exit" style="font-size:12px;padding:12px 20px;">SAIR</button>
+    </div>
+  </div>
+
+  <!-- CONFIRM NEW GAME -->
+  <div class="overlay" id="confirm-newgame-overlay">
+    <div class="modal-panel">
+      <h2>COMEÇAR NOVO JOGO?</h2>
+      <p>Tem certeza que deseja iniciar um novo jogo?<br>Todo o progresso atual será perdido.</p>
+      <div class="confirm-row">
+        <button class="modal-btn btn-green" id="confirm-newgame-yes" style="margin:0;">SIM</button>
+        <button class="modal-btn btn-red" id="confirm-newgame-no" style="margin:0;">NÃO</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVE SLOTS -->
+  <div class="overlay" id="slots-overlay">
+    <div class="modal-panel" style="max-width:520px;">
+      <h2>SALVAR / CARREGAR JOGO</h2>
+      <div id="slots-list"></div>
+      <button class="modal-btn btn-red" id="slots-back">VOLTAR</button>
+    </div>
+  </div>
+
+  <!-- GENERIC CONFIRM (slot overwrite / delete) -->
+  <div class="overlay" id="generic-confirm-overlay">
+    <div class="modal-panel">
+      <h2 id="generic-confirm-title">CONFIRMAR</h2>
+      <p id="generic-confirm-text"></p>
+      <div class="confirm-row">
+        <button class="modal-btn btn-green" id="generic-confirm-yes" style="margin:0;">SIM</button>
+        <button class="modal-btn btn-red" id="generic-confirm-no" style="margin:0;">CANCELAR</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

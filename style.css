@@ -1,0 +1,149 @@
+:root{
+    --panel-bg:#2b1d14; --panel-border:#6b4a2f; --panel-border-light:#a97a4a;
+    --gold:#ffd257; --text-cream:#f4e9d8; --danger:#e15a4a; --ok:#5fd17a; --obsidian:#241033;
+  }
+  html,body{height:100%;}
+  *{box-sizing:border-box;}
+  body{ margin:0; overflow:hidden; background:#111; font-family:'VT323', monospace; color:var(--text-cream);
+    -webkit-user-select:none; user-select:none; touch-action:none; }
+  #game-root{ position:relative; width:100vw; height:100%; min-height:100dvh; overflow:hidden; }
+  canvas{ display:block; position:absolute; top:0; left:0; width:100%; height:100%;
+    image-rendering:pixelated; image-rendering:crisp-edges; cursor:crosshair; }
+  .pixel-font{ font-family:'Press Start 2P', monospace; }
+
+  #hud{ position:absolute; top:calc(10px + env(safe-area-inset-top,0px)); left:10px; right:10px;
+    display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none; z-index:5; }
+  .hud-panel{ background:rgba(20,14,9,0.82); border:3px solid var(--panel-border-light); border-radius:6px;
+    padding:8px 12px; box-shadow:0 3px 0 rgba(0,0,0,0.4); pointer-events:auto; }
+  #money-box{ font-size:20px; color:var(--gold); display:flex; align-items:center; gap:8px; white-space:nowrap; }
+  #money-box .pixel-font{ font-size:12px; color:var(--gold); }
+  #stats-box{ font-size:14px; line-height:1.35; min-width:175px; }
+  #stats-box .label{ color:#c7a97a; font-size:10px; letter-spacing:0.5px;}
+  #stats-box .row{ display:flex; justify-content:space-between; gap:14px;}
+  #drone-activity{ font-size:12px; color:#c7a97a; margin-top:2px; }
+
+  #inv-panel{ position:absolute; left:10px; top:50%; transform:translateY(-50%);
+    background:rgba(20,14,9,0.85); border:3px solid var(--panel-border-light); border-radius:8px;
+    padding:10px 10px 12px; width:180px; max-height:78vh; overflow-y:auto; z-index:5; pointer-events:auto; box-shadow:0 3px 0 rgba(0,0,0,0.4); }
+  #inv-panel h3{ font-family:'Press Start 2P', monospace; font-size:10px; color:var(--gold); margin:0 0 8px; text-align:center; }
+  .inv-row{ display:flex; align-items:center; gap:8px; font-size:14px; padding:2px 0; }
+  .inv-swatch{ width:16px;height:16px;border-radius:3px; flex-shrink:0; border:1px solid rgba(255,255,255,0.25);}
+  .inv-name{ flex:1; color:#e8d7bf; }
+  .inv-qty{ color:var(--text-cream); font-weight:bold; }
+  #inv-total{ margin-top:8px; padding-top:6px; border-top:1px dashed #6b4a2f; text-align:center; font-size:16px; color:var(--gold); }
+
+  #surface-btn{ position:absolute; right:10px; bottom:calc(96px + env(safe-area-inset-bottom,0px)); z-index:6; pointer-events:auto;
+    font-family:'Press Start 2P', monospace; font-size:10px; padding:10px 12px; border-radius:8px;
+    background:#3a5a8a; border:2px solid #7fa8d8; color:#fff; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,0.4);
+    text-align:center; line-height:1.5; }
+  #surface-btn:active{ transform:translateY(2px); box-shadow:none; }
+
+  #menu-btn{ position:absolute; right:10px; bottom:calc(160px + env(safe-area-inset-bottom,0px)); z-index:6; pointer-events:auto;
+    font-family:'Press Start 2P', monospace; font-size:10px; padding:10px 12px; border-radius:8px;
+    background:#5a3b1c; border:2px solid #a97a4a; color:#fff; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,0.4);
+    text-align:center; line-height:1.5; }
+  #menu-btn:active{ transform:translateY(2px); box-shadow:none; }
+
+  #pause-overlay .modal-panel{ max-width:360px; }
+  #confirm-newgame-overlay .modal-panel{ max-width:420px; }
+  #confirm-newgame-overlay p{ font-size:17px; line-height:1.5; }
+  .confirm-row{ display:flex; gap:12px; justify-content:center; margin-top:18px; }
+
+  .slot-row{ border:2px solid #4a3320; border-radius:8px; padding:10px 12px; margin-bottom:10px; background:rgba(0,0,0,0.18); text-align:left; }
+  .slot-header{ display:flex; align-items:center; justify-content:space-between; font-size:17px; margin-bottom:4px; }
+  .slot-status{ font-family:'Press Start 2P', monospace; font-size:9px; padding:4px 8px; border-radius:5px; }
+  .slot-status.empty{ background:#3a2c1e; color:#8a7256; }
+  .slot-status.occupied{ background:#2f6b3f; color:#cdf5d8; }
+  .slot-info{ font-size:14px; color:#c7a97a; margin-bottom:8px; }
+  .slot-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .slot-btn{ font-family:'Press Start 2P', monospace; font-size:9px; padding:8px 10px; border-radius:6px;
+    border:2px solid var(--panel-border-light); background:#7a4f28; color:var(--text-cream); cursor:pointer; }
+  .slot-btn-load{ background:#3a5a8a; border-color:#7fa8d8; }
+  .slot-btn-del{ background:#8a3a2e; border-color:#c76a56; }
+
+  #hint{ position:absolute; bottom:calc(14px + env(safe-area-inset-bottom,0px)); left:50%; transform:translateX(-50%);
+    background:rgba(20,14,9,0.78); border:2px solid var(--panel-border-light); border-radius:6px;
+    padding:6px 14px; font-size:13px; z-index:5; pointer-events:none; text-align:center; max-width:80vw; }
+
+  #toast{ position:absolute; top:calc(70px + env(safe-area-inset-top,0px)); left:50%; transform:translateX(-50%);
+    background:rgba(20,14,9,0.92); border:3px solid var(--gold); border-radius:8px;
+    padding:12px 20px; font-size:18px; z-index:15; text-align:center; max-width:80vw;
+    opacity:0; transition:opacity .3s; pointer-events:none; }
+  #toast.show{ opacity:1; }
+
+  #joystick-wrap{ position:absolute; bottom:calc(18px + env(safe-area-inset-bottom,0px)); left:18px; right:18px;
+    display:flex; justify-content:space-between; align-items:flex-end; pointer-events:none; z-index:6; }
+  .touch-btn{ pointer-events:auto; width:56px;height:56px; border-radius:50%;
+    background:rgba(43,29,20,0.75); border:3px solid var(--panel-border-light); color:var(--text-cream);
+    font-size:22px; display:flex;align-items:center;justify-content:center; font-family:'Press Start 2P',monospace;
+    box-shadow:0 3px 0 rgba(0,0,0,0.4); }
+  .touch-btn:active{ transform:translateY(2px); box-shadow:none; }
+  #dpad{ display:flex; gap:10px; pointer-events:auto; }
+  #minebtn{ background:rgba(150,60,40,0.75); }
+
+  .overlay{ position:absolute; inset:0; background:rgba(10,7,4,0.78);
+    display:none; align-items:center; justify-content:center; z-index:30; text-align:center; }
+  .modal-panel{ width:min(580px, 92vw); max-height:88vh; overflow-y:auto;
+    background:var(--panel-bg); border:4px solid var(--panel-border-light); border-radius:10px;
+    padding:20px 20px 24px; box-shadow:0 8px 0 rgba(0,0,0,0.5); }
+  .modal-panel h2{ font-family:'Press Start 2P', monospace; font-size:14px; color:var(--gold); text-align:center; margin:4px 0 16px; }
+  .modal-btn{ display:block; margin:16px auto 0; font-family:'Press Start 2P', monospace; font-size:12px;
+    padding:10px 20px; border-radius:6px; cursor:pointer; }
+  .btn-red{ background:var(--danger); border:2px solid #a13a2e; color:white; }
+  .btn-green{ background:var(--ok); border:2px solid #3a8a52; color:#123018; }
+  .btn-blue{ background:#3a5a8a; border:2px solid #7fa8d8; color:white; }
+
+  .tabs-row{ display:flex; gap:8px; margin-bottom:14px; justify-content:center; flex-wrap:wrap;}
+  .tab-btn{ font-family:'Press Start 2P', monospace; font-size:9px; padding:8px 10px; border-radius:6px;
+    background:#3a2c1e; border:2px solid var(--panel-border); color:#c7a97a; cursor:pointer; }
+  .tab-btn.active{ background:#7a4f28; color:var(--text-cream); border-color:var(--panel-border-light); }
+
+  .pick-row{ display:flex; align-items:center; gap:12px; padding:10px; border:2px solid #4a3320; border-radius:8px;
+    margin-bottom:8px; background:rgba(0,0,0,0.18); }
+  .pick-row.current{ border-color:var(--ok); background:rgba(95,209,122,0.12); }
+  .pick-row.locked{ opacity:0.5; }
+  .pick-swatch{ width:38px;height:38px; border-radius:6px; flex-shrink:0; border:2px solid rgba(255,255,255,0.25); display:flex;align-items:center;justify-content:center; font-size:18px; overflow:hidden; }
+  .pick-swatch img{ width:30px; height:30px; object-fit:contain; image-rendering:pixelated; image-rendering:crisp-edges; display:block; }
+  .pick-info{ flex:1; }
+  .pick-info .name{ font-size:17px; }
+  .pick-info .desc{ font-size:12px; color:#c7a97a; }
+  .pick-buy{ font-family:'Press Start 2P', monospace; font-size:10px; padding:9px 10px; border-radius:6px;
+    border:2px solid var(--panel-border-light); background:#7a4f28; color:var(--text-cream); cursor:pointer; white-space:nowrap; }
+  .pick-buy:disabled{ background:#3a2c1e; color:#6b5b46; cursor:not-allowed; border-color:#4a3320; }
+  .money-line{ text-align:center; color:var(--gold); font-size:18px; margin-bottom:10px; }
+
+  .trit-row{ display:flex; justify-content:space-between; font-size:16px; padding:3px 0; border-bottom:1px dotted #4a3320;}
+  #trit-total-line{ font-size:19px; color:var(--gold); text-align:center; margin:14px 0 4px; }
+  #trit-confirm{ display:block; margin:10px auto 0; font-family:'Press Start 2P', monospace; font-size:12px;
+    padding:12px 18px; border-radius:8px; background:var(--ok); border:2px solid #3a8a52; color:#123018; cursor:pointer; }
+  #trit-confirm:disabled{ background:#3a3a3a; color:#777; border-color:#333; cursor:not-allowed; }
+  #trit-empty{ text-align:center; color:#c7a97a; font-size:16px; padding:14px 0; }
+
+  #main-menu{ position:absolute; inset:0; z-index:50; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:linear-gradient(180deg,#3a7fae 0%, #7fc4dc 45%, #b98a52 75%, #6b4326 100%); }
+  #main-menu .title{ font-family:'Press Start 2P', monospace; font-size:clamp(20px,4.4vw,40px); color:#fff5d6;
+    text-shadow:4px 4px 0 #6b4326, -2px -2px 0 rgba(0,0,0,0.2); text-align:center; margin-bottom:8px; line-height:1.5; }
+  #main-menu .subtitle{ font-size:18px; color:#fff5d6; margin-bottom:36px; text-align:center; text-shadow:2px 2px 0 rgba(0,0,0,0.3);}
+  .menu-btn{ font-family:'Press Start 2P', monospace; font-size:14px; color:var(--text-cream);
+    background:#5a3b1c; border:3px solid #a97a4a; border-radius:8px; padding:14px 34px; margin:7px 0;
+    cursor:pointer; width:min(280px,70vw); box-shadow:0 4px 0 #3a2410; }
+  .menu-btn:active{ transform:translateY(3px); box-shadow:none; }
+  .menu-pick-deco{ font-size:52px; margin-bottom:6px; }
+
+  #intro-overlay .modal-panel{ max-width:560px; }
+  #intro-overlay p{ font-size:19px; line-height:1.6; text-align:left; }
+  #controls-overlay ul{ text-align:left; font-size:15px; line-height:1.8; padding-left:22px; }
+  #settings-overlay label{ display:flex; align-items:center; gap:10px; font-size:17px; justify-content:center; margin:14px 0;}
+
+  #victory-overlay .modal-panel{ border-color:var(--gold); text-align:center; }
+  #victory-overlay h1{ font-family:'Press Start 2P', monospace; color:var(--gold); font-size:16px; margin-bottom:14px; }
+  #victory-overlay p{ font-size:18px; line-height:1.5; }
+
+  @media (max-width: 680px){
+    #stats-box{ font-size:11px; min-width:140px;}
+    #money-box{ font-size:16px;}
+    #hint{ font-size:10px; }
+    #inv-panel{ width:150px; padding:8px; max-height:70vh; }
+    .inv-row{ font-size:12px; }
+    #surface-btn{ font-size:9px; padding:8px 9px; bottom:calc(84px + env(safe-area-inset-bottom,0px)); }
+  }

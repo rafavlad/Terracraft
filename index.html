@@ -84,6 +84,7 @@
       <div class="tabs-row" id="enchant-tabs">
         <div class="tab-btn active" data-etab="eff">🔥 EFICIÊNCIA</div>
         <div class="tab-btn" data-etab="loot">🍀 LOOTING</div>
+        <div class="tab-btn" data-etab="area">💥 QUEBRA EM ÁREA</div>
       </div>
       <div id="enchant-list"></div>
       <button class="modal-btn btn-red" id="enchant-close">FECHAR (E)</button>
@@ -106,9 +107,9 @@
     <div class="menu-pick-deco">⛏️</div>
     <div class="title">PICARETA &amp;<br>MONTANHA</div>
     <div class="subtitle">uma aventura de mineração e progressão</div>
-    <button class="menu-btn" id="btn-new-game">NOVO JOGO</button>
+    <button class="menu-btn" id="btn-start-game">INICIAR JOGO</button>
     <button class="menu-btn" id="btn-continue">CONTINUAR</button>
-    <button class="menu-btn" id="btn-save">SALVAR JOGO</button>
+    <button class="menu-btn" id="btn-new-game">NOVO JOGO</button>
     <button class="menu-btn" id="btn-settings">CONFIGURAÇÕES</button>
     <button class="menu-btn" id="btn-controls">CONTROLES</button>
     <button class="menu-btn" id="btn-exit">SAIR</button>
@@ -177,22 +178,10 @@
     </div>
   </div>
 
-  <!-- CONFIRM NEW GAME -->
-  <div class="overlay" id="confirm-newgame-overlay">
-    <div class="modal-panel">
-      <h2>COMEÇAR NOVO JOGO?</h2>
-      <p>Tem certeza que deseja iniciar um novo jogo?<br>Todo o progresso atual será perdido.</p>
-      <div class="confirm-row">
-        <button class="modal-btn btn-green" id="confirm-newgame-yes" style="margin:0;">SIM</button>
-        <button class="modal-btn btn-red" id="confirm-newgame-no" style="margin:0;">NÃO</button>
-      </div>
-    </div>
-  </div>
-
   <!-- SAVE SLOTS -->
   <div class="overlay" id="slots-overlay">
     <div class="modal-panel" style="max-width:520px;">
-      <h2>SALVAR / CARREGAR JOGO</h2>
+      <h2 id="slots-title">SALVAR / CARREGAR JOGO</h2>
       <div id="slots-list"></div>
       <button class="modal-btn btn-red" id="slots-back">VOLTAR</button>
     </div>
@@ -204,8 +193,8 @@
       <h2 id="generic-confirm-title">CONFIRMAR</h2>
       <p id="generic-confirm-text"></p>
       <div class="confirm-row">
-        <button class="modal-btn btn-green" id="generic-confirm-yes" style="margin:0;">SIM</button>
         <button class="modal-btn btn-red" id="generic-confirm-no" style="margin:0;">CANCELAR</button>
+        <button class="modal-btn btn-green" id="generic-confirm-yes" style="margin:0;">CONFIRMAR</button>
       </div>
     </div>
   </div>

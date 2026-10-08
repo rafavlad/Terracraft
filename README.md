@@ -1,4 +1,4 @@
-# Terracraft
+# Picareta & Montanha
 
 Jogo 2D de mineração e progressão (pixel art), em HTML + CSS + JavaScript puro — sem build, sem dependências de servidor.
 
@@ -50,30 +50,25 @@ e acesse `http://localhost:8000`.
 > Se algo não carregar (fontes do Google Fonts, salvamento) ao abrir direto
 > via `file://`, tente rodar via servidor local como acima.
 
-## Sistema de salvamento (5 slots independentes)
+## Menu e sistema de mundos (5 slots independentes)
 
-O jogo tem **5 slots de salvamento totalmente independentes**, acessíveis
-pelo botão **"Salvar Jogo"** no menu principal e no menu de pausa (tecla
-ESC ou botão MENU durante a partida).
+Menu principal: **Iniciar Jogo · Continuar · Novo Jogo · Configurações · Controles · Sair**.
+Os três primeiros abrem a tela de 5 slots (cada slot mostra VAZIO ou MUNDO SALVO + dinheiro,
+picareta, fase e data do último save). Clique no slot para agir; **VOLTAR** retorna ao menu.
 
-- **Slot vazio** → botão "SALVAR AQUI" salva ali direto.
-- **Slot ocupado** → mostra dinheiro, picareta, fase (Montanha / Pedra
-  Escura / Profundezas) e data do último save, com os botões "SALVAR AQUI"
-  (pede confirmação antes de sobrescrever), "CARREGAR" e "EXCLUIR" (também
-  com confirmação).
-- **Continuar** (menu principal) retoma automaticamente o último slot
-  usado. Se nenhum slot tiver sido salvo ainda, avisa que não há partida
-  salva.
-- **Novo Jogo** nunca mexe nos slots já salvos — ele só desvincula a sessão
-  atual de qualquer slot até você escolher salvar em um.
-- Cada slot guarda o estado completo: dinheiro, picareta, bolsa,
-  investimento, eficiência, looting, drones, inventário, baús abertos,
-  os blocos já minerados na montanha e a posição do jogador.
+- **Iniciar Jogo** → abre a tela "NOVO JOGO". Slot vazio: cria um mundo novo ali e entra no jogo.
+  Slot ocupado: pede "Este slot já possui um mundo salvo. Deseja substituir este mundo?"
+  (CANCELAR / SUBSTITUIR). Nada é apagado antes de SUBSTITUIR.
+- **Novo Jogo** → mesma regra do item acima.
+- **Continuar** → slot salvo: carrega aquele mundo exatamente como foi salvo; slot vazio mostra
+  "Este slot está vazio." e permanece na tela.
+- **Salvar Jogo** (menu de pausa: ESC ou botão MENU) → vazio: salva direto; ocupado: pede
+  confirmação. Também permite carregar e excluir (com confirmação).
 
-Internamente cada slot é uma chave própria no `localStorage`
-(`save_slot_1` a `save_slot_5`), nunca compartilhada entre si. Progresso de
-uma versão anterior (de slot único) é migrado automaticamente para o
-**Slot 1** na primeira vez que o jogo carrega.
+Cada slot é uma chave própria no `localStorage` (`save_slot_1` a `save_slot_5`) com o estado
+completo do mundo: dinheiro, picareta, bolsa, investimento, encantamentos, drones, inventário,
+baús abertos, blocos já minerados, profundidade máxima e posição. O autosave (~2s, ações
+importantes, ao abrir o menu de pausa e ao fechar a aba) grava só no slot da sessão atual.
 
 ## Cheats de teste (console do navegador)
 

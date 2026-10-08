@@ -120,7 +120,8 @@ const BAGS = [
   { id:4, cap:50,  cost:1500 },
   { id:5, cap:100, cost:3000 },
   { id:6, cap:150, cost:6800 },
-  { id:7, cap:200, cost:12500 }
+  { id:7, cap:200, cost:12500 },
+  { id:8, cap:500, cost:18000 }
 ];
 
 const INVESTMENTS = [
@@ -192,13 +193,11 @@ const LOOTING_TIERS = [
 // "Quebra em Área": radius N means an (2N+1)x(2N+1) square centered on the block the player breaks.
 const AREA_TIERS = [
   { id:0, radius:0, cost:0 },
-  { id:1, radius:1, cost:200 },
-  { id:2, radius:2, cost:800 },
-  { id:3, radius:3, cost:1500 },
-  { id:4, radius:4, cost:3400 },
-  { id:5, radius:5, cost:6900 },
-  { id:6, radius:6, cost:10300 },
-  { id:7, radius:7, cost:15000 }
+  { id:1, radius:1, cost:200 },    // 3x3
+  { id:2, radius:2, cost:2000 },   // 5x5
+  { id:3, radius:3, cost:5000 },   // 7x7
+  { id:4, radius:4, cost:10000 },  // 9x9
+  { id:5, radius:5, cost:20000 }   // 11x11
 ];
 
 /* ============================================================
@@ -259,7 +258,7 @@ function applyLoadedStateObject(p){
   state.droneCapTier = p.droneCapTier||0;
   state.efficiencyTier = p.efficiencyTier||0;
   state.lootingTier = p.lootingTier||0;
-  state.areaTier = p.areaTier||0;
+  state.areaTier = Math.min(p.areaTier||0, AREA_TIERS.length-1); // old saves with VI/VII become V
   state.blocksMined = p.blocksMined||0;
   state.seenVictory = !!p.seenVictory;
   state.maxDepthReached = p.maxDepthReached||0;
@@ -389,8 +388,11 @@ function doDeleteSlot(n){
 
 function bagCapacity(){ return BAGS[state.bagTier].cap; }
 function investmentMult(){ return INVESTMENTS[state.investmentTier].mult; }
-function inventoryTotal(){ let t=0; for(const k in state.inventory) t+=state.inventory[k]; return t; }
-function inventoryHasSpace(n){ return inventoryTotal()+n <= bagCapacity(); }
+// Bag capacity is PER BLOCK TYPE: a 10-bag holds up to 10 grass AND 10 dirt AND 10 stone ... Each type
+// fills up on its own; a full type never blocks the others.
+function typeCount(key){ return state.inventory[key]||0; }
+function typeFree(key){ return Math.max(0, bagCapacity() - typeCount(key)); }
+function inventoryHasSpaceFor(key, n){ return typeFree(key) >= n; }
 function playerUnlockTier(){ return PICKAXES[state.pickaxeTier].unlockTier; }
 function playerSpeedMult(){ return PICKAXES[state.pickaxeTier].speedMult * EFFICIENCY_TIERS[state.efficiencyTier].mult; }
 function playerLootQty(baseYield){ return (baseYield||1) + LOOTING_TIERS[state.lootingTier].extra; }
@@ -678,7 +680,7 @@ function tryMine(dt){
     }
     return;
   }
-  if(!inventoryHasSpace(1)){
+  if(!inventoryHasSpaceFor(data.key,1)){ // only THIS type is full - other types keep mining normally
     if(!mining||mining.col!==targetCol||mining.row!==targetRow) mining={col:targetCol,row:targetRow,progress:0,blocked:true,reason:'cheio'};
     return;
   }
@@ -693,8 +695,7 @@ function tryMine(dt){
     claimedTiles.delete(key);
     state.blocksMined++;
     const wanted = playerLootQty(data.baseYield);
-    const free = bagCapacity()-inventoryTotal();
-    const give = Math.max(1, Math.min(wanted, free));
+    const give = Math.max(1, Math.min(wanted, typeFree(data.key)));
     state.inventory[data.key] = (state.inventory[data.key]||0)+give;
     addFloatText(targetCol*TILE+TILE/2, targetRow*TILE, '+'+give+' '+data.name, MATERIAL_META[data.key].color);
     addParticles(targetCol*TILE+TILE/2, targetRow*TILE+TILE/2, data.color, 10);
@@ -716,7 +717,6 @@ function processAreaBreak(centerCol, centerRow){
   const gained = {};
   let totalBroken = 0;
   const maxTier = playerUnlockTier();
-  outer:
   for(let dy=-radius; dy<=radius; dy++){
     for(let dx=-radius; dx<=radius; dx++){
       if(dx===0 && dy===0) continue; // the center block was already handled by the normal mining flow
@@ -726,10 +726,9 @@ function processAreaBreak(centerCol, centerRow){
       const data = BLOCK_DATA[type];
       if(data.tier===Infinity) continue;      // indestructible - never forced open
       if(maxTier < data.tier) continue;       // pickaxe can't break this one - skip it, don't force it
-      if(!inventoryHasSpace(1)){ break outer; } // no room at all for another drop - stop the whole area pass
+      if(!inventoryHasSpaceFor(data.key,1)) continue; // this type is full: leave the block intact (never destroy a block whose drop can't be stored)
       const wanted = playerLootQty(data.baseYield);
-      const free = bagCapacity()-inventoryTotal();
-      const give = Math.max(1, Math.min(wanted, free));
+      const give = Math.max(1, Math.min(wanted, typeFree(data.key)));
       markMined(col, row);
       state.blocksMined++;
       state.inventory[data.key] = (state.inventory[data.key]||0) + give;
@@ -936,7 +935,7 @@ function renderShop(){
       const owned=bItem.id<=state.bagTier, isCurrent=bItem.id===state.bagTier, isNext=bItem.id===state.bagTier+1;
       list.appendChild(makeRow({
         swatchBg:'#7a5230', iconKey:'bolsa_jogador', name:`Bolsa: ${bItem.cap} itens`,
-        desc:`Capacidade total de ${bItem.cap} itens`,
+        desc:`${bItem.cap} de CADA tipo de bloco (grama, terra, pedra, carvão, ferro, ouro, esmeralda, diamante...)`,
         owned, isCurrent, isNext, cost:bItem.cost,
         onBuy:()=>{ state.bagTier=bItem.id; }, rerender:renderShop
       }));
@@ -976,7 +975,7 @@ function renderMachines(){
     DRONE_COUNT_TIERS.forEach(t=>{
       const owned=t.id<=state.droneCountTier, isCurrent=t.id===state.droneCountTier, isNext=t.id===state.droneCountTier+1;
       list.appendChild(makeRow({
-        swatchBg:'#3a5a8a', iconKey:'drone', name:`${t.count} drone${t.count===1?'':'s'} (máx. ${MAX_DRONES})`,
+        swatchBg:'#3a5a8a', iconKey:'drone', name: t.count===0 ? 'Nenhum drone' : `${t.count} drone${t.count===1?'':'s'}`,
         desc: t.id===0 ? 'Nenhum drone ainda — compre o primeiro para automatizar' : `Total de drones trabalhando ao mesmo tempo: ${t.count}`,
         owned, isCurrent, isNext, cost:t.cost,
         onBuy:()=>{ state.droneCountTier=t.id; }, rerender:renderMachines
@@ -986,7 +985,7 @@ function renderMachines(){
     DRONE_SPEED_TIERS.forEach(t=>{
       const owned=t.id<=state.droneSpeedTier, isCurrent=t.id===state.droneSpeedTier, isNext=t.id===state.droneSpeedTier+1;
       list.appendChild(makeRow({
-        swatchBg:'#c9a422', iconKey:'velocidade_drone', name:`Velocidade ${t.mult}x (máx. 10x)`,
+        swatchBg:'#c9a422', iconKey:'velocidade_drone', name:`Velocidade ${t.mult}x`,
         desc: t.id===0 ? 'Velocidade base ao possuir um drone' : `Voo e mineração ${t.mult}x mais rápidos`,
         owned, isCurrent, isNext, cost:t.cost,
         onBuy:()=>{ state.droneSpeedTier=t.id; }, rerender:renderMachines
@@ -996,7 +995,7 @@ function renderMachines(){
     DRONE_CAP_TIERS.forEach(t=>{
       const owned=t.id<=state.droneCapTier, isCurrent=t.id===state.droneCapTier, isNext=t.id===state.droneCapTier+1;
       list.appendChild(makeRow({
-        swatchBg:'#7a5230', iconKey:'capacidade_drone', name:`${t.cap} itens por drone (máx. 100)`,
+        swatchBg:'#7a5230', iconKey:'capacidade_drone', name:`${t.cap} itens por drone`,
         desc: t.id===0 ? 'Capacidade base de cada drone' : `Cada drone carrega até ${t.cap} itens por viagem`,
         owned, isCurrent, isNext, cost:t.cost,
         onBuy:()=>{ state.droneCapTier=t.id; }, rerender:renderMachines
@@ -1044,7 +1043,7 @@ function renderEnchant(){
       }));
     });
   } else {
-    const roman = ['','I','II','III','IV','V','VI','VII'];
+    const roman = ['','I','II','III','IV','V'];
     AREA_TIERS.forEach(t=>{
       const owned=t.id<=state.areaTier, isCurrent=t.id===state.areaTier, isNext=t.id===state.areaTier+1;
       const size = t.radius*2+1;
@@ -1113,15 +1112,16 @@ document.getElementById('trit-confirm').addEventListener('click', ()=>{
 /* ---- Chests ---- */
 function openChest(ch){
   if(ch.isTotem){
-    if(!inventoryHasSpace(1)){ showToast('Baú com item raro! Volte com espaço na bolsa.'); return; }
+    if(!inventoryHasSpaceFor('totem',1)){ showToast('Baú com item raro! Sua bolsa de Totem está cheia.'); return; }
     state.inventory.totem = (state.inventory.totem||0)+1;
     ch.opened=true; state.chestsOpened[ch.id]=true;
     showToast('✨ Você encontrou um TOTEM misterioso! ✨', 4000);
   } else {
-    const pool = ch.deep ? ['iron','gold','emerald','diamond'] : ['coal','iron','gold','emerald'];
-    const key = pool[Math.floor(Math.random()*pool.length)];
+    const pool = (ch.deep ? ['iron','gold','emerald','diamond'] : ['coal','iron','gold','emerald'])
+                   .sort(()=>Math.random()-0.5);
     const qty = ch.deep ? (4+Math.floor(Math.random()*4)) : (2+Math.floor(Math.random()*3));
-    if(!inventoryHasSpace(qty)){ showToast('Baú encontrado, mas sua bolsa está cheia!'); return; }
+    const key = pool.find(k=>inventoryHasSpaceFor(k,qty)); // a full type doesn't block the chest if another fits
+    if(!key){ showToast('Baú encontrado, mas sua bolsa está cheia desses recursos!'); return; }
     state.inventory[key] = (state.inventory[key]||0)+qty;
     ch.opened=true; state.chestsOpened[ch.id]=true;
     showToast((ch.deep?'Baú das Profundezas! ':'Baú encontrado! ')+'+'+qty+' '+MATERIAL_META[key].name);
@@ -1179,8 +1179,8 @@ function findDroneChestTarget(){
 }
 // Chests are checked first (so they never sit abandoned once a drone is free), then normal
 // block mining - this never disables or replaces the regular mining target search.
-function findDroneNextTarget(){
-  const chestTgt = findDroneChestTarget();
+function findDroneNextTarget(skipChests){
+  const chestTgt = skipChests ? null : findDroneChestTarget();
   if(chestTgt) return { type:'chest', target:chestTgt };
   const blockTgt = findDroneTarget();
   if(blockTgt) return { type:'block', target:blockTgt };
@@ -1228,6 +1228,23 @@ function droneTriturationValue(carried){
   }
   return total;
 }
+// Progress watchdog for the two "moving" states: with the overshoot-safe movement the distance to
+// the destination must keep shrinking. If it somehow doesn't for 3s, the drone is recovered
+// instead of being left frozen forever.
+function droneStuck(d, dist, dt){
+  const tag = d.state + ':' + (d.target ? (d.target.key||d.target.chestId||'') : '');
+  if(d.progTag!==tag){ d.progTag=tag; d.progDist=dist; d.progTime=0; return false; }
+  if(dist < d.progDist - 0.2){ d.progDist=dist; d.progTime=0; return false; }
+  d.progTime += dt;
+  return d.progTime > 3;
+}
+// From wherever the drone is right now: full -> go deposit; otherwise look for the next target
+// (never teleports back to the dock). With nothing to do it deposits what it carries, or waits.
+function retargetDrone(d, capacity){
+  if(d.carriedTotal>=capacity) assignDroneTarget(d, null);
+  else assignDroneTarget(d, findDroneNextTarget(d.skipChests));
+}
+
 function updateDrones(dt){
   const activeCount = DRONE_COUNT_TIERS[state.droneCountTier].count;
   const speedMult = DRONE_SPEED_TIERS[state.droneSpeedTier].mult;
@@ -1239,15 +1256,22 @@ function updateDrones(dt){
     const d = drones[i];
     if(i>=activeCount){
       releaseDroneTarget(d);
-      d.active=false; d.state='docked'; d.carried={}; d.carriedTotal=0;
+      d.active=false; d.placed=false; d.state='docked'; d.carried={}; d.carriedTotal=0; d.skipChests=false;
       continue;
     }
     d.active = true;
     const dock = dockPosition(i);
 
     if(d.state==='docked'){
-      d.x=dock.x; d.y=dock.y;
-      assignDroneTarget(d, findDroneNextTarget());
+      if(!d.placed){ d.x=dock.x; d.y=dock.y; d.placed=true; } // only the very first activation snaps to the dock
+      if(d.carriedTotal>0){ d.state='returning'; continue; }   // never idle while still holding items
+      const found = findDroneNextTarget(d.skipChests);
+      if(found){ assignDroneTarget(d, found); }
+      else {
+        // nothing available: wait at the dock (fly back smoothly instead of teleporting)
+        const dx=dock.x-d.x, dy=dock.y-d.y, dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist>1){ const m=Math.min(flySpeed*dt, dist); d.x+=(dx/dist)*m; d.y+=(dy/dist)*m; }
+      }
       continue;
     }
     if(d.state==='flying'){
@@ -1261,9 +1285,10 @@ function updateDrones(dt){
         stillValid = curType!==B.EMPTY && !isIndestructible(curType);
         tx=d.target.col*TILE+TILE/2; ty=d.target.row*TILE+TILE/2;
       }
-      // if the target vanished mid-flight (player/another process got there first), abandon immediately
+      // target vanished mid-flight (player / area-break / another drone got there first): release it
+      // and pick another one right from where the drone is - no teleport, no waiting
       if(!stillValid){
-        releaseDroneTarget(d); d.state='docked';
+        releaseDroneTarget(d); retargetDrone(d, capacity);
         continue;
       }
       const dx=tx-d.x, dy=ty-d.y, dist=Math.sqrt(dx*dx+dy*dy);
@@ -1271,6 +1296,8 @@ function updateDrones(dt){
         // close enough - stop and lock onto the target immediately, no more repositioning
         if(d.targetType==='chest'){ d.state='opening_chest'; d.chestTimer=0.4; }
         else { d.state='mining'; d.mineProgress=0; }
+      } else if(droneStuck(d, dist, dt)){
+        releaseDroneTarget(d); retargetDrone(d, capacity);
       } else {
         // never move further than the distance actually remaining this frame, so a high-speed
         // drone lands exactly on the target instead of overshooting and oscillating around it
@@ -1282,33 +1309,23 @@ function updateDrones(dt){
     }
     if(d.state==='opening_chest'){
       const ch = CHESTS.find(c=>c.id===d.target.chestId);
-      if(!ch || ch.opened){ releaseDroneTarget(d); d.state='docked'; continue; }
+      if(!ch || ch.opened){ releaseDroneTarget(d); retargetDrone(d, capacity); continue; }
       // movement is fully frozen here - only the open/collect timer advances
       d.chestTimer -= dt;
       if(d.chestTimer<=0){
         const got = tryDroneOpenChest(d, ch, capacity);
         releaseDroneTarget(d);
-        if(got){
-          autoSave();
-          if(d.carriedTotal>=capacity) assignDroneTarget(d, null);
-          else assignDroneTarget(d, findDroneNextTarget());
-        } else {
-          // didn't fit this time - don't immediately retry the same chest in a loop;
-          // fall back to normal block mining, it can try chests again on a future trip
-          if(d.carriedTotal>=capacity){ assignDroneTarget(d, null); }
-          else {
-            const bt = findDroneTarget();
-            if(bt){ d.target=bt; d.targetType='block'; d.state='flying'; }
-            else { d.state='docked'; }
-          }
-        }
+        if(got) autoSave();
+        else d.skipChests = true; // didn't fit: leave it for a later trip (after depositing) instead of retrying in a loop
+        retargetDrone(d, capacity);
       }
       continue;
     }
     if(d.state==='mining'){
       const type = tileAt(d.target.col,d.target.row);
       if(type===B.EMPTY || isIndestructible(type)){
-        releaseDroneTarget(d); d.state='docked';
+        // block destroyed by someone else while being mined: cancel, no yield, pick another target
+        releaseDroneTarget(d); retargetDrone(d, capacity);
         continue;
       }
       const data = BLOCK_DATA[type];
@@ -1324,8 +1341,7 @@ function updateDrones(dt){
         state.blocksMined++;
         addParticles(d.target.col*TILE+TILE/2, d.target.row*TILE+TILE/2, data.color, 6);
         releaseDroneTarget(d);
-        if(d.carriedTotal>=capacity) assignDroneTarget(d, null);
-        else assignDroneTarget(d, findDroneNextTarget());
+        retargetDrone(d, capacity); // full -> returning (to deposit); otherwise next target
       }
       continue;
     }
@@ -1333,6 +1349,8 @@ function updateDrones(dt){
       const dx=trit.x-d.x, dy=trit.y-d.y, dist=Math.sqrt(dx*dx+dy*dy);
       if(dist<=ARRIVE_DIST){
         d.state='dumping'; d.dumpTimer=0.35;
+      } else if(droneStuck(d, dist, dt)){
+        d.x=trit.x; d.y=trit.y; d.state='dumping'; d.dumpTimer=0.35; // recovery: never let a loaded drone hang
       } else {
         const moveDist = Math.min(flySpeed*dt, dist); // same overshoot guard as the flying state
         d.x += (dx/dist)*moveDist;
@@ -1350,8 +1368,9 @@ function updateDrones(dt){
           addParticles(trit.x, trit.y, '#ffd257', 8);
           updateHUD(); autoSave();
         }
-        d.carried = {}; d.carriedTotal = 0;
-        assignDroneTarget(d, findDroneNextTarget());
+        d.carried = {}; d.carriedTotal = 0; // capacity back to 0 - only after the money was credited
+        d.skipChests = false;
+        retargetDrone(d, capacity);          // back to work right away
       }
       continue;
     }
@@ -1363,19 +1382,19 @@ function updateDrones(dt){
    ============================================================ */
 let gameStarted = false;
 let returnToPause = false; // when settings/controls were opened from the in-game pause menu
-let slotsReturnTo = 'main'; // 'main' or 'pause' - where "VOLTAR" on the slots screen should go
+let slotsReturnTo = 'start'; // 'start' (INICIAR JOGO screen) or 'pause' - where "VOLTAR" on the slots screen should go
 
-// "Iniciar Jogo", "Continuar" and "Novo Jogo" all open the same 5-slot screen, each in its own
-// mode (see SLOTS_TITLES / renderSlots) - this is also how the in-game "Salvar Jogo" opens it.
-document.getElementById('btn-start-game').addEventListener('click', ()=>{
-  slotsMode='start'; slotsReturnTo='main'; renderSlots(); openOverlay('slots-overlay');
+// MENU PRINCIPAL -> INICIAR JOGO -> (NOVO JOGO | CONTINUAR) -> 5 SLOTS. "VOLTAR" steps back one screen.
+document.getElementById('btn-start-game').addEventListener('click', ()=> openOverlay('start-overlay'));
+document.getElementById('start-new').addEventListener('click', ()=>{
+  closeOverlay('start-overlay');
+  slotsMode='newgame'; slotsReturnTo='start'; renderSlots(); openOverlay('slots-overlay');
 });
-document.getElementById('btn-continue').addEventListener('click', ()=>{
-  slotsMode='continue'; slotsReturnTo='main'; renderSlots(); openOverlay('slots-overlay');
+document.getElementById('start-continue').addEventListener('click', ()=>{
+  closeOverlay('start-overlay');
+  slotsMode='continue'; slotsReturnTo='start'; renderSlots(); openOverlay('slots-overlay');
 });
-document.getElementById('btn-new-game').addEventListener('click', ()=>{
-  slotsMode='newgame'; slotsReturnTo='main'; renderSlots(); openOverlay('slots-overlay');
-});
+document.getElementById('start-back').addEventListener('click', ()=> closeOverlay('start-overlay'));
 document.getElementById('intro-start').addEventListener('click', ()=>{
   closeOverlay('intro-overlay');
   gameStarted = true;
@@ -1440,6 +1459,7 @@ document.getElementById('pause-newgame').addEventListener('click', ()=>{
 document.getElementById('slots-back').addEventListener('click', ()=>{
   closeOverlay('slots-overlay');
   if(slotsReturnTo==='pause') openOverlay('pause-overlay');
+  else if(slotsReturnTo==='start') openOverlay('start-overlay');
 });
 
 let genericConfirmCallback = null;
@@ -1610,10 +1630,11 @@ function updateHUD(){
     const meta = MATERIAL_META[key];
     const row = document.createElement('div');
     row.className='inv-row';
-    row.innerHTML = `<div class="inv-swatch" style="background:${meta.color}"></div><div class="inv-name">${meta.name}</div><div class="inv-qty">${qty}</div>`;
+    const cap = bagCapacity();
+    row.innerHTML = `<div class="inv-swatch" style="background:${meta.color}"></div><div class="inv-name">${meta.name}</div><div class="inv-qty${qty>=cap?' full':''}">${qty}/${cap}</div>`;
     invList.appendChild(row);
   });
-  document.getElementById('inv-total').textContent = inventoryTotal()+'/'+bagCapacity();
+  document.getElementById('inv-total').textContent = 'Bolsa: '+bagCapacity()+' de cada tipo';
 }
 
 /* ============================================================
@@ -1938,5 +1959,6 @@ window.setMoney = function(amount){
 };
 window.debugState = function(){ return state; };
 window.debugTile = function(col,row){ return tileAt(col,row); };
+window.debugDrones = function(){ return drones.filter(d=>d.active).map(d=>({id:d.id,state:d.state,carried:d.carriedTotal,x:Math.round(d.x),y:Math.round(d.y),tt:d.targetType})); };
 window.debugPlayer = function(){ return {x:player.x,y:player.y,col:Math.floor((player.x+player.w/2)/TILE),feetRow:Math.floor((player.y+player.h)/TILE),camX:camX,camY:camY}; };
 })();

@@ -24,12 +24,13 @@
 
   #inv-panel{ position:absolute; left:10px; top:50%; transform:translateY(-50%);
     background:rgba(20,14,9,0.85); border:3px solid var(--panel-border-light); border-radius:8px;
-    padding:10px 10px 12px; width:180px; max-height:78vh; overflow-y:auto; z-index:5; pointer-events:auto; box-shadow:0 3px 0 rgba(0,0,0,0.4); }
+    padding:10px 10px 12px; width:200px; max-height:78vh; overflow-y:auto; z-index:5; pointer-events:auto; box-shadow:0 3px 0 rgba(0,0,0,0.4); }
   #inv-panel h3{ font-family:'Press Start 2P', monospace; font-size:10px; color:var(--gold); margin:0 0 8px; text-align:center; }
   .inv-row{ display:flex; align-items:center; gap:8px; font-size:14px; padding:2px 0; }
   .inv-swatch{ width:16px;height:16px;border-radius:3px; flex-shrink:0; border:1px solid rgba(255,255,255,0.25);}
-  .inv-name{ flex:1; color:#e8d7bf; }
-  .inv-qty{ color:var(--text-cream); font-weight:bold; }
+  .inv-name{ flex:1; color:#e8d7bf; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  .inv-qty{ color:var(--text-cream); font-weight:bold; white-space:nowrap; }
+  .inv-qty.full{ color:#ff8a7a; }
   #inv-total{ margin-top:8px; padding-top:6px; border-top:1px dashed #6b4a2f; text-align:center; font-size:16px; color:var(--gold); }
 
   #surface-btn{ position:absolute; right:10px; bottom:calc(96px + env(safe-area-inset-bottom,0px)); z-index:6; pointer-events:auto;

@@ -52,23 +52,24 @@ e acesse `http://localhost:8000`.
 
 ## Menu e sistema de mundos (5 slots independentes)
 
-Menu principal: **Iniciar Jogo · Continuar · Novo Jogo · Configurações · Controles · Sair**.
-Os três primeiros abrem a tela de 5 slots (cada slot mostra VAZIO ou MUNDO SALVO + dinheiro,
-picareta, fase e data do último save). Clique no slot para agir; **VOLTAR** retorna ao menu.
+Menu principal: **Iniciar Jogo · Configurações · Controles · Sair**.
+**Iniciar Jogo** abre uma tela com **Novo Jogo · Continuar · Voltar**, e cada uma leva à tela de 5 slots
+(VAZIO ou MUNDO SALVO + dinheiro, picareta, fase e data). Clique no slot; **VOLTAR** sempre sobe um nível.
 
-- **Iniciar Jogo** → abre a tela "NOVO JOGO". Slot vazio: cria um mundo novo ali e entra no jogo.
-  Slot ocupado: pede "Este slot já possui um mundo salvo. Deseja substituir este mundo?"
-  (CANCELAR / SUBSTITUIR). Nada é apagado antes de SUBSTITUIR.
-- **Novo Jogo** → mesma regra do item acima.
-- **Continuar** → slot salvo: carrega aquele mundo exatamente como foi salvo; slot vazio mostra
-  "Este slot está vazio." e permanece na tela.
-- **Salvar Jogo** (menu de pausa: ESC ou botão MENU) → vazio: salva direto; ocupado: pede
-  confirmação. Também permite carregar e excluir (com confirmação).
+- **Novo Jogo** → slot vazio: cria um mundo novo ali e entra no jogo. Slot ocupado: pede
+  "Este slot já possui um mundo salvo. Deseja substituir este mundo?" (CANCELAR / SUBSTITUIR).
+- **Continuar** → slot salvo: carrega aquele mundo; slot vazio mostra "Este slot está vazio.".
+- **Salvar Jogo** (pausa: ESC ou botão MENU) → vazio: salva; ocupado: confirma. Também carrega/exclui.
 
-Cada slot é uma chave própria no `localStorage` (`save_slot_1` a `save_slot_5`) com o estado
-completo do mundo: dinheiro, picareta, bolsa, investimento, encantamentos, drones, inventário,
-baús abertos, blocos já minerados, profundidade máxima e posição. O autosave (~2s, ações
-importantes, ao abrir o menu de pausa e ao fechar a aba) grava só no slot da sessão atual.
+Cada slot é uma chave própria no `localStorage` (`save_slot_1` a `save_slot_5`) com o estado completo
+(dinheiro, picareta, bolsa, investimento, encantamentos, drones, inventário, baús, blocos minerados, posição).
+Saves antigos com Quebra em Área VI/VII são convertidos para V ao carregar.
+
+## Bolsa
+
+A capacidade é **por tipo de bloco**: uma bolsa de 10 guarda até 10 de grama, 10 de terra, 10 de pedra...
+(o inventário mostra `qtd/capacidade` em cada linha). Um tipo cheio não bloqueia os outros.
+Degraus: 10 · 20 · 30 · 40 · 50 · 100 · 150 · 200 · 500 (R$18.000).
 
 ## Cheats de teste (console do navegador)
 

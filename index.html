@@ -3,10 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Picareta &amp; Montanha</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<title>TerraCraft</title>
+<meta name="description" content="TerraCraft - jogo 2D de mineração e progressão em pixel art.">
+<meta name="application-name" content="TerraCraft">
+<meta name="apple-mobile-web-app-title" content="TerraCraft">
+<meta name="theme-color" content="#2f7a28">
+<!-- favicon: built from the square TerraCraft logo (never the horizontal one) -->
+<link rel="icon" type="image/png" sizes="32x32" href="assets/branding/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/branding/favicon-16.png">
+<link rel="icon" type="image/png" sizes="48x48" href="assets/branding/favicon-48.png">
+<link rel="shortcut icon" href="assets/branding/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/branding/apple-touch-icon.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -104,13 +111,17 @@
 
   <!-- MAIN MENU -->
   <div id="main-menu">
-    <div class="menu-pick-deco">⛏️</div>
-    <div class="title">PICARETA &amp;<br>MONTANHA</div>
-    <div class="subtitle">uma aventura de mineração e progressão</div>
-    <button class="menu-btn" id="btn-start-game">INICIAR JOGO</button>
-    <button class="menu-btn" id="btn-settings">CONFIGURAÇÕES</button>
-    <button class="menu-btn" id="btn-controls">CONTROLES</button>
-    <button class="menu-btn" id="btn-exit">SAIR</button>
+    <canvas id="menu-bg" aria-hidden="true"></canvas>
+    <div class="menu-content">
+      <img class="menu-logo" src="assets/branding/logo.png" alt="TerraCraft" draggable="false">
+      <div class="subtitle">uma aventura de mineração e progressão</div>
+      <div class="menu-buttons">
+        <button class="menu-btn" id="btn-start-game">INICIAR JOGO</button>
+        <button class="menu-btn" id="btn-settings">CONFIGURAÇÕES</button>
+        <button class="menu-btn" id="btn-controls">CONTROLES</button>
+        <button class="menu-btn" id="btn-exit">SAIR</button>
+      </div>
+    </div>
   </div>
 
   <!-- INTRO -->
@@ -167,12 +178,12 @@
   <div class="overlay" id="pause-overlay">
     <div class="modal-panel">
       <h2>MENU</h2>
-      <button class="menu-btn" id="pause-newgame" style="font-size:12px;padding:12px 20px;">NOVO JOGO</button>
-      <button class="menu-btn" id="pause-continue" style="font-size:12px;padding:12px 20px;">CONTINUAR</button>
-      <button class="menu-btn" id="pause-save" style="font-size:12px;padding:12px 20px;">SALVAR JOGO</button>
-      <button class="menu-btn" id="pause-settings" style="font-size:12px;padding:12px 20px;">CONFIGURAÇÕES</button>
-      <button class="menu-btn" id="pause-controls" style="font-size:12px;padding:12px 20px;">CONTROLES</button>
-      <button class="menu-btn" id="pause-exit" style="font-size:12px;padding:12px 20px;">SAIR</button>
+      <button class="menu-btn" id="pause-newgame">NOVO JOGO</button>
+      <button class="menu-btn" id="pause-continue">CONTINUAR</button>
+      <button class="menu-btn" id="pause-save">SALVAR JOGO</button>
+      <button class="menu-btn" id="pause-settings">CONFIGURAÇÕES</button>
+      <button class="menu-btn" id="pause-controls">CONTROLES</button>
+      <button class="menu-btn" id="pause-exit">SAIR</button>
     </div>
   </div>
 
@@ -180,9 +191,9 @@
   <div class="overlay" id="start-overlay">
     <div class="modal-panel" style="max-width:360px;">
       <h2>INICIAR JOGO</h2>
-      <button class="menu-btn" id="start-new" style="font-size:13px;">NOVO JOGO</button>
-      <button class="menu-btn" id="start-continue" style="font-size:13px;">CONTINUAR</button>
-      <button class="menu-btn" id="start-back" style="font-size:13px;background:#8a3a2e;border-color:#c76a56;">VOLTAR</button>
+      <button class="menu-btn" id="start-new">NOVO JOGO</button>
+      <button class="menu-btn" id="start-continue">CONTINUAR</button>
+      <button class="menu-btn btn-red" id="start-back">VOLTAR</button>
     </div>
   </div>
 

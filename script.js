@@ -1378,6 +1378,139 @@ function updateDrones(dt){
 }
 
 /* ============================================================
+   MAIN MENU SCENERY - pixel-art background drawn at low resolution and scaled up crisp.
+   Sky, sun, clouds, mountains, tree-covered hills and grass/dirt/stone layers with ores.
+   Redrawn on resize so it fits any window size.
+   ============================================================ */
+const menuBg = document.getElementById('menu-bg');
+function drawMenuScene(){
+  const menuEl = document.getElementById('main-menu');
+  if(!menuBg || !menuEl || menuEl.style.display==='none') return;
+  const pxs = Math.max(3, Math.round(window.innerHeight/150));     // CSS pixels per scene pixel
+  const W = Math.max(8, Math.ceil(window.innerWidth/pxs)), H = Math.max(8, Math.ceil(window.innerHeight/pxs));
+  menuBg.width = W; menuBg.height = H;
+  const c = menuBg.getContext('2d');
+  const img = c.createImageData(W,H); const buf = new Uint32Array(img.data.buffer);
+  const col = h=>{ const n=parseInt(h.slice(1),16); return ((255<<24)|((n&255)<<16)|(((n>>8)&255)<<8)|((n>>16)&255))>>>0; };
+  const set = (x,y,v)=>{ if(x>=0 && x<W && y>=0 && y<H) buf[y*W+x]=v; };
+  const hash = (x,y)=>{ let h=(Math.imul(x|0,374761393)+Math.imul(y|0,668265263))|0; h=Math.imul(h^(h>>>13),1274126177); return ((h^(h>>>16))>>>0)/4294967296; };
+  const bayer = [[0,0.5],[0.75,0.25]];
+  const k = H/150;
+  const groundTop = H - Math.round(H*0.21);
+
+  // ---- sky: stepped bands with ordered dithering between them
+  // many closely-spaced shades -> soft stepped gradient, with only a hint of dithering between steps
+  const stops=['#2e7fd1','#4393dc','#5fa8e6','#7fbdef','#a2d2f4','#c7e5f7','#e6f3fa'].map(h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]);
+  const LV=36, sky=[];
+  for(let i=0;i<LV;i++){ const t=i/(LV-1)*(stops.length-1), a=Math.min(stops.length-2,Math.floor(t)), f=t-a;
+    const m=j=>Math.round(stops[a][j]+(stops[a+1][j]-stops[a][j])*f);
+    sky.push(col('#'+[m(0),m(1),m(2)].map(v=>v.toString(16).padStart(2,'0')).join(''))); }
+  for(let y=0;y<groundTop;y++){
+    const t=y/groundTop*(LV-1), i=Math.min(LV-2,Math.floor(t)), f=t-i;
+    for(let x=0;x<W;x++) set(x,y, f>bayer[y&1][x&1] ? sky[i+1] : sky[i]);
+  }
+  // ---- sun with a dithered halo
+  const sunX=Math.round(W*0.8), sunY=Math.round(groundTop*0.2), sr=Math.max(4,Math.round(5*k));
+  for(let y=-sr-4;y<=sr+4;y++) for(let x=-sr-4;x<=sr+4;x++){
+    const d=Math.sqrt(x*x+y*y);
+    if(d<=sr) set(sunX+x,sunY+y, d>sr-1.2 ? col('#ffe27a') : col('#fff6b4'));
+    else if(d<=sr+3.5 && ((x+y)&1)===0) set(sunX+x,sunY+y,col('#fff0a0'));
+  }
+  // ---- clouds (union of ellipses, lighter body, bluish underside)
+  const cloud=(cx,cy,w)=>{
+    const parts=[[-0.25,0.0,0.28,0.12],[0.0,-0.05,0.34,0.17],[0.26,0.01,0.25,0.11]];
+    for(let y=-Math.ceil(w*0.3);y<=Math.ceil(w*0.2);y++) for(let x=-Math.ceil(w*0.6);x<=Math.ceil(w*0.6);x++){
+      let inside=false;
+      for(const [dx,dy,rx,ry] of parts){ const ex=(x-dx*w)/(rx*w), ey=(y-dy*w)/(ry*w); if(ex*ex+ey*ey<=1){ inside=true; break; } }
+      if(inside) set(cx+x,cy+y, y>w*0.07 ? col('#d3e8f6') : col('#ffffff'));
+    }
+  };
+  [[0.10,0.20,34],[0.34,0.10,24],[0.60,0.27,38],[0.90,0.12,22],[0.47,0.40,18]].forEach(([fx,fy,w])=>cloud(Math.round(W*fx),Math.round(groundTop*fy),Math.round(w*k)));
+
+  // ---- mountains (far, with snow caps) and mid mountains
+  const farH = xs => k*(34+14*Math.sin(xs*0.05+1.2)+9*Math.sin(xs*0.11+0.4)+5*Math.sin(xs*0.23+2));
+  const midH = xs => k*(22+9*Math.sin(xs*0.07+3)+6*Math.sin(xs*0.16+1)+3*Math.sin(xs*0.31));
+  const hillH= xs => k*(9+4*Math.sin(xs*0.09+0.5)+2.5*Math.sin(xs*0.21+4));
+  for(let x=0;x<W;x++){
+    const xs=x/k, h=farH(xs), top=Math.round(groundTop-h);
+    for(let y=top;y<groundTop;y++){
+      let v = (y-top)<h*0.45 ? col('#93b9df') : col('#7ba6d2');
+      if(h>36*k && (y-top) < (h-36*k)*0.4+2+(hash(x,y)<0.3?1:0)) v=col('#f2f8fc');
+      set(x,y,v);
+    }
+  }
+  for(let x=0;x<W;x++){
+    const xs=x/k, h=midH(xs), top=Math.round(groundTop-h);
+    for(let y=top;y<groundTop;y++) set(x,y, (y-top)<2 ? col('#74a6d6') : ((y-top)<h*0.5 ? col('#5f93c4') : col('#5086b8')));
+  }
+  // ---- green hills
+  for(let x=0;x<W;x++){
+    const xs=x/k, h=hillH(xs), top=Math.round(groundTop-h);
+    for(let y=top;y<groundTop;y++) set(x,y, y===top ? col('#6fcf55') : ((y-top)<h*0.5 ? col('#3f9a4a') : col('#318040')));
+  }
+  // ---- trees on the hills (thinner behind the centre so the logo/buttons stay readable)
+  const oak=(x,yb,big)=>{
+    const rx=big?7:5, ry=big?6:4, cy=yb-(big?9:7);
+    for(let t=1;t<=(big?5:4);t++){ set(x,yb-t,col('#5a3b1c')); set(x+1,yb-t,col('#7a4f28')); }
+    for(let y=-ry;y<=ry;y++) for(let xx=-rx;xx<=rx;xx++){
+      const d=(xx*xx)/(rx*rx)+(y*y)/(ry*ry); if(d>1) continue;
+      let v=col('#2f9a3a');
+      if(d>0.72) v=col('#1d5f27'); else if(xx<0 && y<0 && hash(x+xx,cy+y)<0.6) v=col('#5ccc4a'); else if(xx>0 && y>0) v=col('#237a2f');
+      set(x+xx,cy+y,v);
+    }
+  };
+  const pine=(x,yb,big)=>{
+    const h=big?14:10;
+    for(let t=1;t<=3;t++) set(x,yb-t,col('#5a3b1c'));
+    for(let i=0;i<h;i++){ const w=Math.round(i*0.5)+1, y=yb-3-(h-i);
+      for(let xx=-w;xx<=w;xx++) set(x+xx,y, Math.abs(xx)===w ? col('#17563a') : (xx<0 ? col('#2a8a4a'):col('#1f7a3a'))); }
+  };
+  for(let x=4, n=0; x<W-3; n++){
+    const r=hash(n,11), step=Math.round((9+r*8)*k);
+    const nearCentre=Math.abs(x-W/2)<W*0.16;
+    if(!(nearCentre && r<0.6)){
+      const yb=Math.round(groundTop-hillH(x/k))+1, big=hash(n,5)<0.4;
+      if(hash(n,2)<0.62) oak(x,yb,big); else pine(x,yb,big);
+    }
+    x+=Math.max(6,step);
+  }
+  // ---- ground: grass, dirt, stone, ores
+  const stoneBase = groundTop + Math.round((H-groundTop)*0.5);
+  const oreTypes=['#f6cf3f','#2a2a30','#7fe9f0','#cf9a6a','#3fd18a'];
+  for(let x=0;x<W;x++){
+    const gd = 3+Math.floor(hash(x,7)*3);                         // ragged grass depth
+    const stoneTop = stoneBase+Math.round(3*Math.sin(x*0.17))+Math.floor(hash(x,13)*3);
+    for(let y=groundTop;y<H;y++){
+      const dy=y-groundTop; let v;
+      if(dy<gd){ v = dy===0 ? col('#86e85a') : (dy===1 ? col('#55c23c') : (dy===gd-1 ? col('#2a6d24') : col('#3a9a2e'))); }
+      else if(y<stoneTop){
+        const r=hash(x,y); v = r<0.12 ? col('#5d3516') : r<0.22 ? col('#8f5a2b') : r<0.25 ? col('#a9703a') : col('#7a4a22');
+      } else {
+        const r=hash(x,y); v = r<0.18 ? col('#585861') : r<0.30 ? col('#82828c') : col('#6d6d77');
+      }
+      set(x,y,v);
+    }
+  }
+  for(let cy=Math.floor(stoneBase/7)+1; cy<H/7; cy++) for(let cx=0; cx<W/7; cx++){   // ore specks inside the stone layer
+    if(hash(cx,cy)<0.16){
+      const ox=cx*7+Math.floor(hash(cx,cy+99)*4), oy=cy*7+Math.floor(hash(cx+7,cy)*4);
+      const v=col(oreTypes[Math.floor(hash(cx+3,cy+3)*oreTypes.length)]);
+      set(ox,oy,v); set(ox+1,oy,v); set(ox,oy+1,v); if(hash(ox,oy)<0.5) set(ox+1,oy+1,v);
+    }
+  }
+  // ---- grass tufts and a few flowers on the surface
+  for(let x=0;x<W;x++){
+    const r=hash(x,3);
+    if(r<0.28){ const hh=1+Math.floor(hash(x,4)*3); for(let t=1;t<=hh;t++) set(x,groundTop-t, t===hh ? col('#86e85a') : col('#4cb83a')); }
+    else if(r>0.992){ set(x,groundTop-1, hash(x,5)<0.5 ? col('#ff5d73') : col('#ffd84a')); }
+  }
+  c.putImageData(img,0,0);
+}
+let menuSceneRaf=0;
+window.addEventListener('resize', ()=>{ cancelAnimationFrame(menuSceneRaf); menuSceneRaf=requestAnimationFrame(drawMenuScene); });
+drawMenuScene();
+
+/* ============================================================
    MAIN MENU / INTRO / SETTINGS / CONTROLS FLOW
    ============================================================ */
 let gameStarted = false;
@@ -1744,7 +1877,7 @@ function drawChests(){
   });
 }
 function drawPromptAbove(cx, sy, label){
-  ctx.font="12px 'Press Start 2P', monospace";
+  ctx.font="13px 'Silkscreen', monospace";
   const text='Pressione '+label;
   const tw=ctx.measureText(text).width+16;
   ctx.fillStyle='rgba(20,14,9,0.75)'; ctx.fillRect(cx-tw/2, sy-28, tw, 22);
@@ -1851,23 +1984,54 @@ function drawPlayer(){
   ctx.fillStyle='#222'; ctx.fillRect(3,-45+bob,2,2);
 
   const pick = PICKAXES[state.pickaxeTier];
-  let armAngle=-0.4;
+  // Arm pose. The tool is rigid with the forearm and pivots around the HAND (not the head).
+  let armAngle=-0.9;                                         // idle: pickaxe held up and forward
   if(player.state==='mine'){
     const swing = mining && !mining.blocked ? (performance.now()/90):0;
-    armAngle = -0.9+Math.sin(swing)*0.9;
+    armAngle = -0.9+Math.sin(swing)*0.9;                     // same swing as before: raised -> forward strike
   } else if(player.state==='walk'){
-    armAngle = -0.5+Math.sin(player.walkT)*0.25;
+    armAngle = -0.9+Math.sin(player.walkT)*0.25;
   }
   ctx.save(); ctx.translate(9,-32+bob); ctx.rotate(armAngle);
-  ctx.fillStyle='#f0c090'; ctx.fillRect(0,0,6,16);
-  ctx.save(); ctx.translate(3,15); ctx.rotate(0.5);
-  ctx.strokeStyle=pick.head; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,26); ctx.stroke();
-  ctx.fillStyle=pick.head; ctx.beginPath(); ctx.moveTo(-11,-2); ctx.lineTo(11,-2); ctx.lineTo(0,-13); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#f0c090'; ctx.fillRect(0,0,6,16);           // forearm: its tip (3,15) is the hand
+  ctx.save(); ctx.translate(3,15);                           // pivot = the hand
+  ctx.rotate(0.2);                                           // tool axis ~ perpendicular to the forearm
+  drawPickaxeInHand(pick);
   ctx.restore(); ctx.restore(); ctx.restore();
 }
 
+function shadeColor(hex, amt){ // amt in -1..1 (negative = darker, positive = lighter)
+  const n=parseInt(hex.slice(1),16); let r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+  const f = amt<0 ? 0 : 255, t = Math.abs(amt);
+  r=Math.round(r+(f-r)*t); g=Math.round(g+(f-g)*t); b=Math.round(b+(f-b)*t);
+  return 'rgb('+r+','+g+','+b+')';
+}
+// Draws the pickaxe in a frame whose origin is the HAND and whose +x axis runs along the shaft.
+// The hand grips the shaft about a third of the way up from the butt, and the head sits at the far end.
+function drawPickaxeInHand(pick){
+  const BUTT=-14, HEAD_X=26, INK='#1a0f08';
+  // wooden shaft (always brown - only the head changes with the pickaxe tier)
+  ctx.fillStyle=INK;       ctx.fillRect(BUTT-1,-3,HEAD_X-BUTT+3,6);
+  ctx.fillStyle='#8a5a2b'; ctx.fillRect(BUTT,-2,HEAD_X-BUTT+1,4);
+  ctx.fillStyle='#b27a3c'; ctx.fillRect(BUTT,-2,HEAD_X-BUTT+1,1);
+  ctx.fillStyle='#5a3b1c'; ctx.fillRect(BUTT,1,HEAD_X-BUTT+1,1);
+  // head: bar across the end of the shaft, tips curving back toward the hand
+  ctx.beginPath();
+  ctx.moveTo(HEAD_X-7,-12); ctx.lineTo(HEAD_X-1,-10); ctx.lineTo(HEAD_X+3,-5); ctx.lineTo(HEAD_X+3,5);
+  ctx.lineTo(HEAD_X-1,10);  ctx.lineTo(HEAD_X-7,12);  ctx.lineTo(HEAD_X-3,5);  ctx.lineTo(HEAD_X-2,0); ctx.lineTo(HEAD_X-3,-5);
+  ctx.closePath();
+  ctx.fillStyle=pick.head; ctx.fill();
+  ctx.lineJoin='round'; ctx.lineWidth=2; ctx.strokeStyle=INK; ctx.stroke();
+  ctx.strokeStyle=shadeColor(pick.head,0.45); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(HEAD_X+1,-5); ctx.lineTo(HEAD_X+1,5); ctx.stroke();
+  // fist wrapped around the shaft, drawn last so the hand visibly holds it
+  ctx.fillStyle=INK;       ctx.fillRect(-4,-4,8,8);
+  ctx.fillStyle='#f0c090'; ctx.fillRect(-3,-3,6,6);
+  ctx.fillStyle='#d9a06a'; ctx.fillRect(-3,1,6,2);
+}
+
 function drawFloatingTexts(dt){
-  ctx.font="14px 'Press Start 2P', monospace"; ctx.textAlign='center';
+  ctx.font="16px 'Silkscreen', monospace"; ctx.textAlign='center';
   for(let i=floatTexts.length-1;i>=0;i--){
     const f=floatTexts[i]; f.life-=dt*0.9; f.y-=dt*40;
     if(f.life<=0){ floatTexts.splice(i,1); continue; }
@@ -1961,4 +2125,5 @@ window.debugState = function(){ return state; };
 window.debugTile = function(col,row){ return tileAt(col,row); };
 window.debugDrones = function(){ return drones.filter(d=>d.active).map(d=>({id:d.id,state:d.state,carried:d.carriedTotal,x:Math.round(d.x),y:Math.round(d.y),tt:d.targetType})); };
 window.debugPlayer = function(){ return {x:player.x,y:player.y,col:Math.floor((player.x+player.w/2)/TILE),feetRow:Math.floor((player.y+player.h)/TILE),camX:camX,camY:camY}; };
+
 })();

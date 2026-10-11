@@ -49,31 +49,39 @@ const B = {
 const MATERIAL_ORDER = ['grass','dirt','stone','coal','iron','gold','emerald','diamond',
                          'darkstone','coalDeep','ironDeep','goldDeep','emeraldDeep','diamondDeep'];
 
+// CENTRAL PRICE TABLE (R$ per unit, before investment/bonus multipliers). One entry per resource type:
+// there is NO generic price. Block values, the player's triturador and the drones' sales all read from here.
+const PRICES = Object.freeze({
+  grass:1, dirt:2, stone:3, coal:4, iron:5, gold:6, emerald:7, diamond:8,
+  darkstone:5, coalDeep:8, ironDeep:10, goldDeep:12, emeraldDeep:14, diamondDeep:16,
+  totem:16
+});
+
 const BLOCK_DATA = {
-  [B.GRASS]:  { key:'grass',  color:'#5aa93b', edge:'#3f7a29', name:'Grama',     mineTime:1, value:1, tier:0, baseYield:1 },
-  [B.DIRT]:   { key:'dirt',   color:'#8a5a34', edge:'#6b4526', name:'Terra',     mineTime:2, value:2, tier:0, baseYield:1 },
-  [B.STONE]:  { key:'stone',  color:'#8b8b93', edge:'#6c6c73', name:'Pedra',     mineTime:3, value:3, tier:0, baseYield:1 },
-  [B.COAL]:   { key:'coal',   color:'#3a3a3f', edge:'#232326', name:'Carvão',    mineTime:4, value:4, tier:1, baseYield:1 },
-  [B.IRON]:   { key:'iron',   color:'#cf9a6a', edge:'#a3703f', name:'Ferro',     mineTime:5, value:5, tier:1, baseYield:1 },
-  [B.GOLD]:   { key:'gold',   color:'#f4cf47', edge:'#c9a422', name:'Ouro',      mineTime:6, value:6, tier:2, baseYield:1 },
-  [B.EMERALD]:{ key:'emerald',color:'#3fd18a', edge:'#1f9d63', name:'Esmeralda', mineTime:7, value:7, tier:2, baseYield:1 },
-  [B.DIAMOND]:{ key:'diamond',color:'#7fe9f0', edge:'#3fb9c4', name:'Diamante',  mineTime:8, value:8, tier:3, baseYield:1 },
+  [B.GRASS]:  { key:'grass',  color:'#5aa93b', edge:'#3f7a29', name:'Grama',     mineTime:1, value:PRICES.grass, tier:0, baseYield:1 },
+  [B.DIRT]:   { key:'dirt',   color:'#8a5a34', edge:'#6b4526', name:'Terra',     mineTime:2, value:PRICES.dirt, tier:0, baseYield:1 },
+  [B.STONE]:  { key:'stone',  color:'#8b8b93', edge:'#6c6c73', name:'Pedra',     mineTime:3, value:PRICES.stone, tier:0, baseYield:1 },
+  [B.COAL]:   { key:'coal',   color:'#3a3a3f', edge:'#232326', name:'Carvão',    mineTime:4, value:PRICES.coal, tier:1, baseYield:1 },
+  [B.IRON]:   { key:'iron',   color:'#cf9a6a', edge:'#a3703f', name:'Ferro',     mineTime:5, value:PRICES.iron, tier:1, baseYield:1 },
+  [B.GOLD]:   { key:'gold',   color:'#f4cf47', edge:'#c9a422', name:'Ouro',      mineTime:6, value:PRICES.gold, tier:2, baseYield:1 },
+  [B.EMERALD]:{ key:'emerald',color:'#3fd18a', edge:'#1f9d63', name:'Esmeralda', mineTime:7, value:PRICES.emerald, tier:2, baseYield:1 },
+  [B.DIAMOND]:{ key:'diamond',color:'#7fe9f0', edge:'#3fb9c4', name:'Diamante',  mineTime:8, value:PRICES.diamond, tier:3, baseYield:1 },
   [B.BEDROCK]:{ key:null,     color:'#1c1c1e', edge:'#000000', name:'Rocha-mãe', mineTime:Infinity, value:0, tier:Infinity, baseYield:0 },
   [B.OBSIDIAN]:{key:null,    color:'#241033', edge:'#150a1f', name:'Obsidiana', mineTime:Infinity, value:0, tier:Infinity, baseYield:0 },
-  [B.DARKSTONE]:{key:'darkstone', color:'#2c2c31', edge:'#141416', name:'Pedra Escura',       mineTime:20, value:5,  tier:2, baseYield:1 },
-  [B.COAL_DEEP]:{key:'coalDeep',  color:'#5c5c64', edge:'#333338', name:'Carvão Profundo',    mineTime:4, value:8,  tier:1, baseYield:1 },
-  [B.IRON_DEEP]:{key:'ironDeep',  color:'#e6ac7c', edge:'#b8804d', name:'Ferro Profundo',     mineTime:5, value:10, tier:1, baseYield:1 },
-  [B.GOLD_DEEP]:{key:'goldDeep',  color:'#ffe066', edge:'#d1af2f', name:'Ouro Profundo',      mineTime:6, value:12, tier:2, baseYield:1 },
-  [B.EMERALD_DEEP]:{key:'emeraldDeep', color:'#4dffa6', edge:'#22c47a', name:'Esmeralda Profunda', mineTime:7, value:14, tier:2, baseYield:1 },
-  [B.DIAMOND_DEEP]:{key:'diamondDeep', color:'#a8f5fa', edge:'#6fd8e0', name:'Diamante Profundo',  mineTime:8, value:16, tier:3, baseYield:1 },
+  [B.DARKSTONE]:{key:'darkstone', color:'#2c2c31', edge:'#141416', name:'Pedra Escura',       mineTime:20, value:PRICES.darkstone,  tier:2, baseYield:1 },
+  [B.COAL_DEEP]:{key:'coalDeep',  color:'#5c5c64', edge:'#333338', name:'Carvão Profundo',    mineTime:4, value:PRICES.coalDeep,  tier:1, baseYield:1 },
+  [B.IRON_DEEP]:{key:'ironDeep',  color:'#e6ac7c', edge:'#b8804d', name:'Ferro Profundo',     mineTime:5, value:PRICES.ironDeep, tier:1, baseYield:1 },
+  [B.GOLD_DEEP]:{key:'goldDeep',  color:'#ffe066', edge:'#d1af2f', name:'Ouro Profundo',      mineTime:6, value:PRICES.goldDeep, tier:2, baseYield:1 },
+  [B.EMERALD_DEEP]:{key:'emeraldDeep', color:'#4dffa6', edge:'#22c47a', name:'Esmeralda Profunda', mineTime:7, value:PRICES.emeraldDeep, tier:2, baseYield:1 },
+  [B.DIAMOND_DEEP]:{key:'diamondDeep', color:'#a8f5fa', edge:'#6fd8e0', name:'Diamante Profundo',  mineTime:8, value:PRICES.diamondDeep, tier:3, baseYield:1 },
   // PROFUNDEZAS — the endgame layer. These share the BASE material's key (so they fill the
   // same inventory slot/value), but yield 3 units per block and are far more resistant.
-  [B.PROF_STONE]:  { key:'stone',   color:'#1c1c1f', edge:'#0a0a0b', name:'Pedra das Profundezas',     mineTime:9,  value:3, tier:4, baseYield:3 },
-  [B.PROF_COAL]:   { key:'coal',    color:'#242428', edge:'#101012', name:'Carvão das Profundezas',    mineTime:11, value:4, tier:4, baseYield:3 },
-  [B.PROF_IRON]:   { key:'iron',    color:'#8a6248', edge:'#5c4128', name:'Ferro das Profundezas',     mineTime:13, value:5, tier:4, baseYield:3 },
-  [B.PROF_GOLD]:   { key:'gold',    color:'#b89425', edge:'#8a6f16', name:'Ouro das Profundezas',      mineTime:16, value:6, tier:4, baseYield:3 },
-  [B.PROF_EMERALD]:{ key:'emerald', color:'#237a52', edge:'#155636', name:'Esmeralda das Profundezas', mineTime:19, value:7, tier:4, baseYield:3 },
-  [B.PROF_DIAMOND]:{ key:'diamond', color:'#4fa8ae', edge:'#2f7a80', name:'Diamante das Profundezas',  mineTime:24, value:8, tier:4, baseYield:3 }
+  [B.PROF_STONE]:  { key:'stone',   color:'#1c1c1f', edge:'#0a0a0b', name:'Pedra das Profundezas',     mineTime:9,  value:PRICES.stone, tier:4, baseYield:3 },
+  [B.PROF_COAL]:   { key:'coal',    color:'#242428', edge:'#101012', name:'Carvão das Profundezas',    mineTime:11, value:PRICES.coal, tier:4, baseYield:3 },
+  [B.PROF_IRON]:   { key:'iron',    color:'#8a6248', edge:'#5c4128', name:'Ferro das Profundezas',     mineTime:13, value:PRICES.iron, tier:4, baseYield:3 },
+  [B.PROF_GOLD]:   { key:'gold',    color:'#b89425', edge:'#8a6f16', name:'Ouro das Profundezas',      mineTime:16, value:PRICES.gold, tier:4, baseYield:3 },
+  [B.PROF_EMERALD]:{ key:'emerald', color:'#237a52', edge:'#155636', name:'Esmeralda das Profundezas', mineTime:19, value:PRICES.emerald, tier:4, baseYield:3 },
+  [B.PROF_DIAMOND]:{ key:'diamond', color:'#4fa8ae', edge:'#2f7a80', name:'Diamante das Profundezas',  mineTime:24, value:PRICES.diamond, tier:4, baseYield:3 }
 };
 const PEDRA_ESCURA_BLOCK_IDS = new Set([B.DARKSTONE, B.COAL_DEEP, B.IRON_DEEP, B.GOLD_DEEP, B.EMERALD_DEEP, B.DIAMOND_DEEP]);
 const PROFUNDEZAS_BLOCK_IDS = new Set([B.PROF_STONE, B.PROF_COAL, B.PROF_IRON, B.PROF_GOLD, B.PROF_EMERALD, B.PROF_DIAMOND]);
@@ -95,7 +103,7 @@ const MATERIAL_META = {
   diamondDeep:{name:'Diamante Profundo',  color:'#a8f5fa'},
   totem:  {name:'Totem',              color:'#c77dff'}
 };
-const TOTEM_BASE_VALUE = 16;
+const TOTEM_BASE_VALUE = PRICES.totem;
 
 // unlockTier = highest material tier this pickaxe can break. Prices per latest official balance.
 const PICKAXES = [
@@ -121,7 +129,8 @@ const BAGS = [
   { id:5, cap:100, cost:3000 },
   { id:6, cap:150, cost:6800 },
   { id:7, cap:200, cost:12500 },
-  { id:8, cap:500, cost:18000 }
+  { id:8, cap:500, cost:18000 },
+  { id:9, cap:1000, cost:29500 }
 ];
 
 const INVESTMENTS = [
@@ -297,6 +306,9 @@ function saveToSlot(n){
 // Background/event autosave: only ever writes to the slot the player explicitly chose
 // (via "Salvar Aqui" or "Carregar"). A brand-new, never-saved session never touches any slot.
 let saveTimer = 0;
+let saveDirty = false;
+let forceSaveTimer = 0;   // also save every ~10s even if nothing 'dirty' changed (keeps the player position fresh)
+function markDirty(){ saveDirty = true; }   // cheap: the periodic timer saves at most once every 2s
 function autoSave(){
   if(currentSlot) saveToSlot(currentSlot);
 }
@@ -479,18 +491,23 @@ function oreForDepth(depth, rnd){
 }
 
 let grid = [];
+const tileCache = { cv:null, cx:null, col0:0, row0:0, cols:0, rows:0, valid:false };
 let minedTilesSet = new Set(); // tracks every tile dug this session, for persistence across reloads
 function markMined(col,row){
   grid[row][col] = B.EMPTY;
   minedTilesSet.add(col+','+row);
+  markDirty();
+  invalidateTile(col,row);
 }
 function applyMinedTiles(){
   for(const key of minedTilesSet){
     const [c,r] = key.split(',').map(Number);
     if(grid[r] && c>=0 && c<COLS) grid[r][c] = B.EMPTY;
   }
+  tileCache.valid=false;
 }
 function buildGrid(){
+  tileCache.valid = false;   // new world -> repaint the cached tile layer
   for(let r=0;r<ROWS;r++) grid[r] = new Array(COLS).fill(B.EMPTY);
   for(let c=0;c<COLS;c++){
     if(c < PLATFORM_COLS){
@@ -541,6 +558,7 @@ function buildChests(){
     const sr = surfaceRow[Math.min(COLS-1,col)];
     const row = Math.min(ROWS-3, sr + 3 + Math.floor(s.fr*(ROWS-sr-8)));
     grid[row][col] = B.EMPTY;
+    tileCache.valid = false;
     return { id:'chest'+i, col, row, isTotem:s.totem, deep:!!s.deep, opened: !!state.chestsOpened['chest'+i] };
   });
 }
@@ -557,10 +575,13 @@ function resize(){
   W = window.innerWidth; H = window.innerHeight;
   canvas.width = Math.floor(W*DPR); canvas.height = Math.floor(H*DPR);
   ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.imageSmoothingEnabled = false;   // the tile cache is blitted 1:1 - never blur pixel art
+  tileCache.valid = false;
 }
 window.addEventListener('resize', resize);
 resize();
-let camX=0, camY=0;
+let camX=0, camY=0;          // render camera (aligned to device pixels so the cached tile layer stays crisp)
+let camFX=0, camFY=0;        // smoothed float camera
 
 /* ============================================================
    PLAYER
@@ -572,6 +593,44 @@ const player = {
 };
 function respawnAtSurface(){ player.x=SPAWN.x; player.y=SPAWN.y; player.vx=0; player.vy=0; }
 
+/* ============================================================
+   INPUT: keyboard + mouse (desktop) and virtual controls (touch).
+   Both feed the SAME game logic (updatePlayer / tryMine), so nothing is duplicated.
+   ============================================================ */
+const settings = {
+  touchMode: (function(){ try{ return localStorage.getItem('tc_touch_ui')||'auto'; }catch(e){ return 'auto'; } })(),   // 'auto' | 'on' | 'off'
+  autoMine:  (function(){ try{ return localStorage.getItem('tc_automine')==='1'; }catch(e){ return false; } })()
+};
+// touch input state, written by the virtual controls and read by updatePlayer()/tryMine()
+const touchState = { ui:false, moveX:0, aimX:0, aimY:0, aimActive:false, jump:false, mine:false };
+let touchDetected = false;           // set the first time a real touch is seen (hybrid devices)
+let aimDir = { x:1, y:0 };           // last meaningful aim direction (kept when the stick is released)
+let aimPreview = null;               // tile the virtual aim currently points at (drawn as a reticle)
+
+// ---- layout mode: decides which controls/HUD variant is used (desktop / compact / touch) ----
+function detectTouchPrimary(){
+  const mt = navigator.maxTouchPoints||0;
+  const coarse = window.matchMedia && (matchMedia('(pointer: coarse)').matches || matchMedia('(hover: none)').matches);
+  return mt>0 && !!coarse;
+}
+function applyLayoutMode(){
+  const w=window.innerWidth, h=window.innerHeight;
+  const touchUi = settings.touchMode==='on' ? true : (settings.touchMode==='off' ? false : (touchDetected || detectTouchPrimary()));
+  const compact = touchUi || w<=820 || h<=520;
+  const b = document.body;
+  b.classList.toggle('touch-ui', touchUi);
+  b.classList.toggle('compact', compact);
+  b.classList.toggle('portrait', h>w);
+  b.classList.toggle('landscape', w>=h);
+  touchState.ui = touchUi;
+  if(!touchUi) resetTouchInputs();
+  const cb = document.getElementById('toggle-touch'); if(cb) cb.checked = touchUi;
+}
+window.addEventListener('resize', applyLayoutMode);
+window.addEventListener('orientationchange', ()=>setTimeout(applyLayoutMode,120));
+// a hybrid device (touch laptop) shows the touch controls once it is actually touched - keyboard/mouse keep working
+window.addEventListener('pointerdown', e=>{ if(e.pointerType==='touch' && !touchDetected){ touchDetected=true; applyLayoutMode(); } }, true);
+
 const keys = {};
 window.addEventListener('keydown', e=>{
   keys[e.code]=true;
@@ -580,66 +639,109 @@ window.addEventListener('keydown', e=>{
 });
 window.addEventListener('keyup', e=>{ keys[e.code]=false; });
 
-function bindHold(el,onDown,onUp){
-  el.addEventListener('touchstart', e=>{e.preventDefault(); onDown();});
-  el.addEventListener('touchend', e=>{e.preventDefault(); onUp();});
-  el.addEventListener('mousedown', e=>{e.preventDefault(); onDown();});
-  window.addEventListener('mouseup', ()=>{ onUp(); });
+// ---- virtual joystick (Pointer Events: one pointer per stick, so two thumbs never cancel each other) ----
+function makeStick(rootEl, onChange){
+  const base = rootEl.querySelector('.stick-base'), knob = rootEl.querySelector('.stick-knob');
+  let pid=null, cx=0, cy=0, R=1;
+  const setKnob=(nx,ny)=>{ knob.style.transform='translate('+(nx*R*0.7).toFixed(1)+'px,'+(ny*R*0.7).toFixed(1)+'px)'; };
+  const update=e=>{
+    let nx=(e.clientX-cx)/R, ny=(e.clientY-cy)/R;
+    const len=Math.hypot(nx,ny); if(len>1){ nx/=len; ny/=len; }
+    setKnob(nx,ny); onChange(nx,ny,true);
+  };
+  const end=e=>{ if(e && e.pointerId!==pid) return; pid=null; rootEl.classList.remove('active'); setKnob(0,0); onChange(0,0,false); };
+  rootEl.addEventListener('pointerdown', e=>{
+    if(pid!==null) return;
+    pid=e.pointerId; try{ rootEl.setPointerCapture(pid); }catch(_){}
+    const r=base.getBoundingClientRect(); cx=r.left+r.width/2; cy=r.top+r.height/2; R=r.width/2;
+    rootEl.classList.add('active'); e.preventDefault(); update(e);
+  });
+  rootEl.addEventListener('pointermove', e=>{ if(e.pointerId===pid){ e.preventDefault(); update(e); } });
+  rootEl.addEventListener('pointerup', end);
+  rootEl.addEventListener('pointercancel', end);
+  rootEl.addEventListener('lostpointercapture', end);
+  return { reset(){ if(pid!==null){ try{ rootEl.releasePointerCapture(pid); }catch(_){} } end(null); pid=null; } };
 }
-let touchLeft=false, touchRight=false, touchJumpQueued=false;
-bindHold(document.getElementById('btn-left'), ()=>touchLeft=true, ()=>touchLeft=false);
-bindHold(document.getElementById('btn-right'), ()=>touchRight=true, ()=>touchRight=false);
-document.getElementById('jumpbtn').addEventListener('touchstart', e=>{e.preventDefault(); touchJumpQueued=true;});
-document.getElementById('jumpbtn').addEventListener('mousedown', e=>{e.preventDefault(); touchJumpQueued=true;});
+// ---- hold buttons (jump / mine) and tap button (interact) ----
+function makeHoldButton(el, onDown, onUp){
+  let pid=null;
+  const end=e=>{ if(e && e.pointerId!==pid) return; pid=null; el.classList.remove('down'); onUp(); };
+  el.addEventListener('pointerdown', e=>{
+    if(pid!==null) return;
+    pid=e.pointerId; try{ el.setPointerCapture(pid); }catch(_){}
+    el.classList.add('down'); e.preventDefault(); onDown();
+  });
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+  el.addEventListener('lostpointercapture', end);
+  return { reset(){ if(pid!==null){ try{ el.releasePointerCapture(pid); }catch(_){} } end(null); pid=null; } };
+}
+const moveShape = v=>{ const a=Math.abs(v); if(a<0.18) return 0; return Math.sign(v)*Math.min(1,(a-0.18)/0.72); };   // dead zone + analog intensity
+function snapAngle(x,y){                       // gentle aim assist: snap to the 8 directions when within ~14 degrees
+  const ang=Math.atan2(y,x), step=Math.PI/4, near=Math.round(ang/step)*step;
+  return Math.abs(ang-near)<0.25 ? near : ang;
+}
+const stickMove = makeStick(document.getElementById('stick-move'), (nx,ny,on)=>{ touchState.moveX = on ? moveShape(nx) : 0; });
+const stickAim  = makeStick(document.getElementById('stick-aim'),  (nx,ny,on)=>{
+  const len=Math.hypot(nx,ny);
+  touchState.aimActive = on && len>0.28;
+  if(touchState.aimActive){
+    const a=snapAngle(nx,ny); aimDir.x=Math.cos(a); aimDir.y=Math.sin(a);
+    touchState.aimX=aimDir.x; touchState.aimY=aimDir.y;
+  } else { touchState.aimX=0; touchState.aimY=0; }
+});
+const btnJump = makeHoldButton(document.getElementById('btn-jump'), ()=>{ touchState.jump=true; }, ()=>{ touchState.jump=false; });
+const btnMine = makeHoldButton(document.getElementById('btn-mine'), ()=>{ touchState.mine=true; }, ()=>{ touchState.mine=false; });
+// INTERAGIR is a plain tap button (click, not pointerdown): opening a window on pointerdown made the tap's own
+// follow-up click land on the new window and close it again.
+document.getElementById('btn-interact').addEventListener('click', handleInteractKey);
+function resetTouchInputs(){          // never leave a control "stuck" (overlay opened, tab hidden, touch UI turned off...)
+  stickMove.reset(); stickAim.reset(); btnJump.reset(); btnMine.reset();
+  touchState.moveX=0; touchState.aimX=0; touchState.aimY=0; touchState.aimActive=false; touchState.jump=false; touchState.mine=false;
+  aimPreview=null;
+}
+window.addEventListener('blur', ()=>{ for(const k in keys) keys[k]=false; resetTouchInputs(); });
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden'){ for(const k in keys) keys[k]=false; resetTouchInputs(); } });
+// the page must never scroll, zoom or open a context menu while the controls are in use
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev, e=>e.preventDefault()));
+document.addEventListener('contextmenu', e=>{ if(touchState.ui || e.target.closest('#game-root')) e.preventDefault(); });
 document.getElementById('surface-btn').addEventListener('click', respawnAtSurface);
-document.getElementById('surface-btn').addEventListener('touchstart', e=>{ e.preventDefault(); respawnAtSurface(); });
 
 /* ============================================================
    MINING (player)
    ============================================================ */
 let mouseWorld = {x:0,y:0};
 let mining = null;
-let isPointerDown = false, touchMineHeld = false;
+let isPointerDown = false;
+let canvasPointerId = null;
 let claimedTiles = new Set();
 let lastTierToastKey = null;
 
 function screenToWorld(px,py){ return {x:px+camX,y:py+camY}; }
-canvas.addEventListener('mousemove', e=>{
+function setMouseFromEvent(e){
   const rect = canvas.getBoundingClientRect();
   mouseWorld = screenToWorld(e.clientX-rect.left, e.clientY-rect.top);
+}
+// mouse and finger on the canvas itself: hold on a block to mine it (unchanged desktop behaviour)
+canvas.addEventListener('pointermove', e=>{ if(e.pointerType==='mouse' || e.pointerId===canvasPointerId) setMouseFromEvent(e); });
+canvas.addEventListener('pointerdown', e=>{
+  if(e.pointerType==='mouse' && e.button!==0) return;
+  canvasPointerId = e.pointerId; isPointerDown = true; setMouseFromEvent(e);
 });
-canvas.addEventListener('mousedown', e=>{
-  if(e.button!==0) return;
-  isPointerDown = true;
-  const rect = canvas.getBoundingClientRect();
-  mouseWorld = screenToWorld(e.clientX-rect.left, e.clientY-rect.top);
-});
-window.addEventListener('mouseup', ()=>{ isPointerDown=false; });
-canvas.addEventListener('touchmove', e=>{
-  if(e.touches.length){
-    const rect = canvas.getBoundingClientRect();
-    const t = e.touches[0];
-    mouseWorld = screenToWorld(t.clientX-rect.left, t.clientY-rect.top);
-  }
-}, {passive:true});
-canvas.addEventListener('touchstart', e=>{
-  const rect = canvas.getBoundingClientRect();
-  const t = e.touches[0];
-  mouseWorld = screenToWorld(t.clientX-rect.left, t.clientY-rect.top);
-  isPointerDown = true;
-}, {passive:true});
-canvas.addEventListener('touchend', ()=>{ isPointerDown=false; });
+const endCanvasPointer = e=>{ if(e.pointerId===canvasPointerId || e.pointerType==='mouse'){ isPointerDown=false; canvasPointerId=null; } };
+window.addEventListener('pointerup', endCanvasPointer);
+window.addEventListener('pointercancel', endCanvasPointer);
 
-const mineBtn = document.getElementById('minebtn');
-mineBtn.addEventListener('touchstart', e=>{ e.preventDefault(); touchMineHeld=true; });
-mineBtn.addEventListener('touchend', e=>{ e.preventDefault(); touchMineHeld=false; });
-mineBtn.addEventListener('mousedown', e=>{ e.preventDefault(); touchMineHeld=true; });
-window.addEventListener('mouseup', ()=>{ touchMineHeld=false; });
 
 let floatTexts = [];
 let particles = [];
-function addFloatText(x,y,text,color){ floatTexts.push({x,y,text,color,life:1.0}); }
+function onScreen(x,y,m){ return x>camX-m && x<camX+W+m && y>camY-m && y<camY+H+m; }
+function addFloatText(x,y,text,color){
+  if(floatTexts.length>40 || !onScreen(x,y,80)) return;     // effects off-screen are never seen: don't spend time on them
+  floatTexts.push({x,y,text,color,life:1.0});
+}
 function addParticles(x,y,color,count){
+  if(particles.length>320 || !onScreen(x,y,60)) return;
   for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()-0.5)*140,vy:-Math.random()*160-40,life:1.0,color});
 }
 function showToast(msg, ms){
@@ -649,20 +751,42 @@ function showToast(msg, ms){
   showToast._timer = setTimeout(()=>t.classList.remove('show'), ms||3000);
 }
 
+// First solid tile along the aim direction, starting at the player's centre and limited to the pickaxe reach.
+// (A diagonal aim therefore picks the nearest block on that diagonal; nothing else is touched.)
+function aimRayTarget(dirx,diry){
+  const cx=player.x+player.w/2, cy=player.y+player.h/2, maxD=REACH*TILE+6;
+  let lc=null, lr=null;
+  for(let t=6;t<=maxD;t+=6){
+    const col=Math.floor((cx+dirx*t)/TILE), row=Math.floor((cy+diry*t)/TILE);
+    if(col===lc && row===lr) continue; lc=col; lr=row;
+    if(tileAt(col,row)!==B.EMPTY) return { col, row };
+  }
+  return null;
+}
 function tryMine(dt){
-  const pcx=(player.x+player.w/2)/TILE, pcy=(player.y+player.h/2)/TILE;
-  const targetCol = Math.floor(mouseWorld.x/TILE);
-  const targetRow = Math.floor(mouseWorld.y/TILE);
-  const dx=(targetCol+0.5)-pcx, dy=(targetRow+0.5)-pcy;
-  const dist = Math.sqrt(dx*dx+dy*dy);
-
-  const active = (isPointerDown||touchMineHeld);
-  if(!active || dist>REACH){ mining=null; if(player.state==='mine') player.state='idle'; return; }
+  // who is asking to mine, and where?  virtual aim (touch) wins over the mouse/finger on the canvas
+  const aimMine = touchState.ui && (touchState.mine || (settings.autoMine && touchState.aimActive));
+  let targetCol, targetRow, dx, dy;
+  if(aimMine){
+    const t = aimRayTarget(aimDir.x, aimDir.y);
+    aimPreview = t;
+    if(!t){ mining=null; if(player.state==='mine') player.state='idle'; return; }
+    targetCol=t.col; targetRow=t.row;
+    dx = aimDir.x; dy = aimDir.y;
+  } else {
+    aimPreview = (touchState.ui && touchState.aimActive) ? aimRayTarget(aimDir.x, aimDir.y) : null;  // just show where it points
+    const pcx=(player.x+player.w/2)/TILE, pcy=(player.y+player.h/2)/TILE;
+    targetCol = Math.floor(mouseWorld.x/TILE);
+    targetRow = Math.floor(mouseWorld.y/TILE);
+    dx=(targetCol+0.5)-pcx; dy=(targetRow+0.5)-pcy;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    if(!isPointerDown || dist>REACH){ mining=null; if(player.state==='mine') player.state='idle'; return; }
+  }
 
   const type = tileAt(targetCol,targetRow);
   if(type===B.EMPTY){ mining=null; return; }
 
-  player.facing = dx>=0?1:-1;
+  if(Math.abs(dx)>0.2) player.facing = dx>=0?1:-1;
   player.state = 'mine';
 
   const data = BLOCK_DATA[type];
@@ -757,20 +881,21 @@ function rectVsGrid(x,y,w,h){
 }
 
 function updatePlayer(dt){
-  const left = keys['ArrowLeft']||keys['KeyA']||touchLeft;
-  const right = keys['ArrowRight']||keys['KeyD']||touchRight;
-  const jumpPressed = keys['Space']||keys['ArrowUp']||keys['KeyW']||touchJumpQueued;
+  const left = keys['ArrowLeft']||keys['KeyA'];
+  const right = keys['ArrowRight']||keys['KeyD'];
+  const jumpPressed = keys['Space']||keys['ArrowUp']||keys['KeyW']||touchState.jump;
+  // one movement axis shared by keyboard (full speed) and the virtual stick (analog intensity)
+  let axis = (right?1:0)-(left?1:0);
+  if(axis===0) axis = touchState.moveX;
 
   let moving=false;
   if(mining && !mining.blocked){ player.vx *= 0.8; }
   else {
-    if(left){ player.vx=-MOVE_SPEED; player.facing=-1; moving=true; }
-    else if(right){ player.vx=MOVE_SPEED; player.facing=1; moving=true; }
+    if(axis!==0){ player.vx=axis*MOVE_SPEED; player.facing=axis<0?-1:1; moving=true; }
     else player.vx=0;
   }
 
   if(jumpPressed && player.onGround){ player.vy=-JUMP_VELOCITY; player.onGround=false; }
-  touchJumpQueued=false;
 
   player.vy += GRAVITY*dt;
   if(player.vy>1400) player.vy=1400;
@@ -840,18 +965,25 @@ function nearestChest(){
 let anyOverlayOpen = false;
 function openOverlay(id){
   document.getElementById(id).style.display='flex'; anyOverlayOpen=true;
+  resetTouchInputs();
   if(id==='pause-overlay') autoSave(); // leaving the world for the menu: persist progress to its slot (no-op if unsaved session)
 }
 function closeOverlay(id){ document.getElementById(id).style.display='none'; anyOverlayOpen = !!document.querySelector('.overlay[style*="flex"]'); }
 
-function handleInteractKey(){
-  if(!gameStarted || anyOverlayOpen) return;
-  if(nearBancada()){ openShop(); return; }
-  if(nearTriturador()){ openTriturador(); return; }
-  if(nearMachines()){ openMachines(); return; }
-  if(nearEnchant()){ openEnchant(); return; }
+// What would "interact" do right now? Used by key E and by the touch INTERAGIR button (which shows the label).
+function interactTarget(){
+  if(!gameStarted || anyOverlayOpen) return null;
+  if(nearBancada())    return { label:'BANCADA',     run:openShop };
+  if(nearTriturador()) return { label:'TRITURADOR',  run:openTriturador };
+  if(nearMachines())   return { label:'MÁQUINAS',    run:openMachines };
+  if(nearEnchant())    return { label:'ENCANTOS',    run:openEnchant };
   const ch = nearestChest();
-  if(ch){ openChest(ch); return; }
+  if(ch)               return { label:'ABRIR BAÚ',   run:()=>openChest(ch) };
+  return null;
+}
+function handleInteractKey(){
+  const t = interactTarget();
+  if(t) t.run();
 }
 
 /* ---- shared row builder ---- */
@@ -969,6 +1101,13 @@ document.getElementById('machines-overlay').addEventListener('click', e=>{ if(e.
 
 function renderMachines(){
   document.getElementById('machines-money-val').textContent = state.money.toLocaleString('pt-BR');
+  // current level + real effect of each upgrade line, and what the next purchase will give
+  const st = droneStats();
+  const nextCount = DRONE_COUNT_TIERS[state.droneCountTier+1], nextSpeed = DRONE_SPEED_TIERS[state.droneSpeedTier+1], nextCap = DRONE_CAP_TIERS[state.droneCapTier+1];
+  document.getElementById('machines-summary').innerHTML =
+    `<div class="chip"><b>🤖 Drones</b><span>${st.count} ativo${st.count===1?'':'s'} · nível ${state.droneCountTier}</span><small class="eff">trabalham ao mesmo tempo</small><em>${nextCount?'próximo: '+nextCount.count:'nível final'}</em></div>`+
+    `<div class="chip"><b>⚡ Velocidade</b><span>${st.speedMult}x · nível ${state.droneSpeedTier}</span><small class="eff">voo e mineração ${st.speedMult}x mais rápidos</small><em>${nextSpeed?'próximo: '+nextSpeed.mult+'x':'nível final'}</em></div>`+
+    `<div class="chip"><b>📦 Capacidade</b><span>${st.capacity}/drone · nível ${state.droneCapTier}</span><small class="eff">itens por viagem</small><em>${nextCap?'próximo: '+nextCap.cap:'nível final'}</em></div>`;
   const list = document.getElementById('machines-list');
   list.innerHTML='';
   if(machinesTab==='drones'){
@@ -1063,20 +1202,30 @@ document.getElementById('trit-close').addEventListener('click', ()=>closeOverlay
 document.getElementById('trit-overlay').addEventListener('click', e=>{ if(e.target.id==='trit-overlay') closeOverlay('trit-overlay'); });
 
 function materialValue(key){
-  return key==='totem' ? TOTEM_BASE_VALUE : BLOCK_DATA[Object.keys(BLOCK_DATA).find(id=>BLOCK_DATA[id].key===key)].value;
+  const p = PRICES[key];
+  if(typeof p!=='number'){ console.error('TerraCraft: no price defined for resource "'+key+'"'); return 0; }
+  return p;
+}
+// Values a lot of items: qty x unit price of THAT resource type x multipliers. Shared by the player's
+// triturador and by the drones' automatic sale, so a resource is always priced by its own type.
+function appraiseLot(items, mult, bonus){
+  let total=0; const lines=[];
+  for(const key in items){
+    const qty = Math.floor(items[key]||0);
+    if(qty<=0) continue;
+    const unit = materialValue(key);
+    const lineValue = Math.round(qty*unit*mult*(bonus||1));
+    total += lineValue;
+    lines.push({ key, qty, unit, lineValue });
+  }
+  return { total, lines };
 }
 function computeTriturationTotal(){
   const bonus = PICKAXES[state.pickaxeTier].bonus;
   const mult = investmentMult();
-  let total=0; const lines=[];
-  MATERIAL_ORDER.concat(['totem']).forEach(key=>{
-    const qty = state.inventory[key]||0;
-    if(qty<=0) return;
-    const base = materialValue(key);
-    const lineValue = Math.round(qty*base*mult*bonus);
-    total += lineValue;
-    lines.push({ key, qty, lineValue });
-  });
+  const items = {};
+  MATERIAL_ORDER.concat(['totem']).forEach(key=>{ items[key] = state.inventory[key]||0; });
+  const { total, lines } = appraiseLot(items, mult, bonus);
   return { total, lines, bonus, mult };
 }
 function renderTriturador(){
@@ -1148,20 +1297,50 @@ function trituradorPoint(){ return { x:(triturador.col+0.7)*TILE, y:(triturador.
 
 let claimedChests = new Set(); // chest ids currently reserved by a drone (separate from block claims)
 
-function findDroneTarget(){
-  const maxTier = playerUnlockTier(); // drones currently share the player's unlocked material tier
+// Drones used to take "the first block under the surface of a random column", which is almost always
+// grass/dirt/stone - ores sit deeper inside the rock. Now they sample tiles through the whole mineable
+// depth and prefer valuable ores that are also close to them; only when no ore is valid for the current
+// pickaxe tier (e.g. wood pickaxe) do they fall back to the top block of a column.
+// Everything they may target still obeys the existing rules: not indestructible, not Pedra Escura,
+// tier <= unlocked tier, and not already reserved by another drone.
+const DRONE_ORE_SAMPLES = 90;
+function droneTileData(col,row,maxTier){
+  const t = tileAt(col,row);
+  if(t===B.EMPTY || isIndestructible(t) || isPedraEscura(t)) return null;
+  const data = BLOCK_DATA[t];
+  if(!data || data.tier > maxTier) return null;
+  if(claimedTiles.has(col+','+row)) return null;
+  return data;
+}
+function findDroneTarget(px,py){
+  const maxTier = playerUnlockTier(); // drones share the player's unlocked material tier
+  px = px||0; py = py||0;
+  // 1) best ore among random samples (value-weighted, nearer is better)
+  let best=null, bestScore=-1;
+  for(let i=0;i<DRONE_ORE_SAMPLES;i++){
+    const col = MOUNTAIN_MIN_COL + Math.floor(Math.random()*(MOUNTAIN_MAX_COL-MOUNTAIN_MIN_COL));
+    const sr = surfaceRow[col], span = ROWS-2-(sr+3);
+    if(span<=0) continue;
+    const row = sr + 3 + Math.floor(Math.pow(Math.random(),1.5)*span);
+    // cheap rejections first (no string building): only ores that this pickaxe tier may touch survive
+    const t = tileAt(col,row);
+    if(t===B.EMPTY) continue;
+    const data = BLOCK_DATA[t];
+    if(!data || data.tier===Infinity || data.value<4 || data.tier>maxTier || PEDRA_ESCURA_BLOCK_IDS.has(t)) continue;
+    if(data.key==='stone') continue;                                       // Profundezas stone is not an ore either
+    if(claimedTiles.has(col+','+row)) continue;                            // reserved by another drone
+    const dist = Math.hypot(col*TILE+TILE/2-px, row*TILE+TILE/2-py);
+    const score = (data.value*data.value) / (1 + dist/600);
+    if(score>bestScore){ bestScore=score; best={col,row}; }
+  }
+  if(best){ const k=best.col+','+best.row; claimedTiles.add(k); return { col:best.col, row:best.row, key:k }; }
+  // 2) fallback: first valid block from the surface of a random column
   for(let attempt=0; attempt<16; attempt++){
     const col = MOUNTAIN_MIN_COL + Math.floor(Math.random()*(MOUNTAIN_MAX_COL-MOUNTAIN_MIN_COL));
     const startRow = Math.max(0, surfaceRow[col]-1);
     for(let row=startRow; row<ROWS-1; row++){
-      const t = tileAt(col,row);
-      if(t===B.EMPTY) continue;
-      if(isIndestructible(t)) continue;
-      if(isPedraEscura(t)) continue; // drones still can't enter the Pedra Escura layer
-      const data = BLOCK_DATA[t];
-      if(data.tier > maxTier) continue; // drones respect the same mining-level requirements
+      if(!droneTileData(col,row,maxTier)) continue;
       const k = col+','+row;
-      if(claimedTiles.has(k)) continue;
       claimedTiles.add(k);
       return { col, row, key:k };
     }
@@ -1179,10 +1358,10 @@ function findDroneChestTarget(){
 }
 // Chests are checked first (so they never sit abandoned once a drone is free), then normal
 // block mining - this never disables or replaces the regular mining target search.
-function findDroneNextTarget(skipChests){
+function findDroneNextTarget(skipChests, px, py){
   const chestTgt = skipChests ? null : findDroneChestTarget();
   if(chestTgt) return { type:'chest', target:chestTgt };
-  const blockTgt = findDroneTarget();
+  const blockTgt = findDroneTarget(px,py);
   if(blockTgt) return { type:'block', target:blockTgt };
   return null;
 }
@@ -1218,15 +1397,18 @@ function tryDroneOpenChest(d, ch, capacity){
   state.chestsOpened[ch.id] = true;
   return true;
 }
-function droneTriturationValue(carried){
-  const mult = investmentMult();
-  let total=0;
-  for(const k in carried){
-    const qty = carried[k];
-    if(qty<=0) continue;
-    total += Math.round(qty*materialValue(k)*mult);
-  }
-  return total;
+const droneMined = {};  // diagnostics: units mined by drones per resource type
+const salesLog = []; // last drone sales (for diagnostics/tests): which lot was sold and for how much
+// Sells everything the drone carries. The lot is detached from the drone FIRST, so it can never be
+// sold twice, and it is priced item by item (qty x the price of that resource) via appraiseLot().
+function sellDroneLot(d){
+  const res = appraiseLot(d.carried, investmentMult(), 1);   // pure: if anything throws here, nothing has changed yet
+  const lot = d.carried;
+  d.carried = {}; d.carriedTotal = 0;                        // detach the lot, then credit it - no throw can happen in between
+  if(res.total>0) state.money += res.total;
+  salesLog.push({ drone:d.id, lot:Object.assign({},lot), total:res.total, lines:res.lines });
+  if(salesLog.length>80) salesLog.shift();
+  return res.total;
 }
 // Progress watchdog for the two "moving" states: with the overshoot-safe movement the distance to
 // the destination must keep shrinking. If it somehow doesn't for 3s, the drone is recovered
@@ -1242,14 +1424,19 @@ function droneStuck(d, dist, dt){
 // (never teleports back to the dock). With nothing to do it deposits what it carries, or waits.
 function retargetDrone(d, capacity){
   if(d.carriedTotal>=capacity) assignDroneTarget(d, null);
-  else assignDroneTarget(d, findDroneNextTarget(d.skipChests));
+  else assignDroneTarget(d, findDroneNextTarget(d.skipChests, d.x, d.y));
 }
 
-function updateDrones(dt){
-  const activeCount = DRONE_COUNT_TIERS[state.droneCountTier].count;
+// The REAL drone attributes derived from the purchased upgrade levels (used by the simulation, the shop
+// summary and the diagnostics, so what the shop shows is exactly what the drones do).
+function droneStats(){
+  const count = DRONE_COUNT_TIERS[state.droneCountTier].count;
   const speedMult = DRONE_SPEED_TIERS[state.droneSpeedTier].mult;
   const capacity = DRONE_CAP_TIERS[state.droneCapTier].cap;
-  const flySpeed = 85*speedMult;
+  return { count, speedMult, capacity, flySpeed:85*speedMult };
+}
+function updateDrones(dt){
+  const { count:activeCount, speedMult, capacity, flySpeed } = droneStats();
   const trit = trituradorPoint();
 
   for(let i=0;i<drones.length;i++){
@@ -1265,7 +1452,7 @@ function updateDrones(dt){
     if(d.state==='docked'){
       if(!d.placed){ d.x=dock.x; d.y=dock.y; d.placed=true; } // only the very first activation snaps to the dock
       if(d.carriedTotal>0){ d.state='returning'; continue; }   // never idle while still holding items
-      const found = findDroneNextTarget(d.skipChests);
+      const found = findDroneNextTarget(d.skipChests, d.x, d.y);
       if(found){ assignDroneTarget(d, found); }
       else {
         // nothing available: wait at the dock (fly back smoothly instead of teleporting)
@@ -1315,7 +1502,7 @@ function updateDrones(dt){
       if(d.chestTimer<=0){
         const got = tryDroneOpenChest(d, ch, capacity);
         releaseDroneTarget(d);
-        if(got) autoSave();
+        if(got) markDirty();           // throttled save (a burst of chest openings must not cause a burst of writes)
         else d.skipChests = true; // didn't fit: leave it for a later trip (after depositing) instead of retrying in a loop
         retargetDrone(d, capacity);
       }
@@ -1338,6 +1525,7 @@ function updateDrones(dt){
         const yieldQty = Math.max(1, Math.min(data.baseYield||1, capacity-d.carriedTotal));
         d.carried[data.key] = (d.carried[data.key]||0)+yieldQty;
         d.carriedTotal += yieldQty;
+        droneMined[data.key] = (droneMined[data.key]||0)+yieldQty;   // diagnostics: what the drones really mine
         state.blocksMined++;
         addParticles(d.target.col*TILE+TILE/2, d.target.row*TILE+TILE/2, data.color, 6);
         releaseDroneTarget(d);
@@ -1361,15 +1549,15 @@ function updateDrones(dt){
     if(d.state==='dumping'){
       d.dumpTimer -= dt;
       if(d.dumpTimer<=0){
-        const earned = droneTriturationValue(d.carried);
+        let earned;
+        try{ earned = sellDroneLot(d); }
+        catch(err){ console.error('TerraCraft: drone sale failed, retrying shortly', err); d.dumpTimer = 1; continue; } // controlled retry, items kept
         if(earned>0){
-          state.money += earned;
           addFloatText(trit.x, trit.y-6, '+R$'+earned, '#ffe27a');
           addParticles(trit.x, trit.y, '#ffd257', 8);
-          updateHUD(); autoSave();
+          markDirty();
         }
-        d.carried = {}; d.carriedTotal = 0; // capacity back to 0 - only after the money was credited
-        d.skipChests = false;
+        d.skipChests = false;                // load processed: capacity is back to 0
         retargetDrone(d, capacity);          // back to work right away
       }
       continue;
@@ -1543,7 +1731,15 @@ document.getElementById('controls-close').addEventListener('click', ()=>{
   if(returnToPause){ returnToPause=false; openOverlay('pause-overlay'); }
 });
 document.getElementById('toggle-touch').addEventListener('change', e=>{
-  document.getElementById('joystick-wrap').style.display = e.target.checked ? 'flex':'none';
+  settings.touchMode = e.target.checked ? 'on' : 'off';          // explicit choice is remembered
+  try{ localStorage.setItem('tc_touch_ui', settings.touchMode); }catch(_){}
+  applyLayoutMode();
+});
+const autoMineBox = document.getElementById('toggle-automine');
+autoMineBox.checked = settings.autoMine;
+autoMineBox.addEventListener('change', e=>{
+  settings.autoMine = e.target.checked;
+  try{ localStorage.setItem('tc_automine', settings.autoMine?'1':'0'); }catch(_){}
 });
 document.getElementById('btn-exit').addEventListener('click', ()=>{
   showToast('Você pode fechar esta aba para sair. Até a próxima!', 4000);
@@ -1726,57 +1922,89 @@ function resetGameState(){
 /* ============================================================
    HUD
    ============================================================ */
+// The HUD used to rebuild the whole inventory (innerHTML) every frame. Rows are now created once and each
+// value is only written to the DOM when it actually changed.
+const hudEls = {
+  money:document.getElementById('money-val'), pick:document.getElementById('pick-name'), depth:document.getElementById('depth-val'),
+  drones:document.getElementById('drone-val'), activity:document.getElementById('drone-activity'), compact:document.getElementById('stats-compact'),
+  invList:document.getElementById('inv-list'), invTotal:document.getElementById('inv-total'), invToggle:document.getElementById('inv-toggle')
+};
+const hudLast = {};
+function hudSet(key, el, text){ if(hudLast[key]!==text){ hudLast[key]=text; el.textContent=text; } }
+const INV_BASE8 = ['grass','dirt','stone','coal','iron','gold','emerald','diamond'];
+const invRows = {};
+(function initInventoryPanel(){
+  MATERIAL_ORDER.concat(['totem']).forEach(key=>{
+    const meta = MATERIAL_META[key];
+    const row = document.createElement('div'); row.className='inv-row';
+    const sw = document.createElement('div'); sw.className='inv-swatch'; sw.style.background=meta.color;
+    const nm = document.createElement('div'); nm.className='inv-name'; nm.textContent=meta.name;
+    const q = document.createElement('div'); q.className='inv-qty';
+    row.append(sw,nm,q);
+    if(!INV_BASE8.includes(key)) row.style.display='none';   // special resources appear once you own some
+    hudEls.invList.appendChild(row);
+    invRows[key] = { row, q, text:'', full:false, shown:INV_BASE8.includes(key) };
+  });
+})();
+
 function updateHUD(){
-  document.getElementById('money-val').textContent = state.money.toLocaleString('pt-BR');
-  document.getElementById('pick-name').textContent = PICKAXES[state.pickaxeTier].name.replace('Picareta de ','');
+  hudSet('money', hudEls.money, state.money.toLocaleString('pt-BR'));
+  const pickShort = PICKAXES[state.pickaxeTier].name.replace('Picareta de ','');
+  hudSet('pick', hudEls.pick, pickShort);
   const pcRow = Math.floor((player.y+player.h)/TILE);
   const colClamped = Math.max(0,Math.min(COLS-1, Math.floor((player.x+player.w/2)/TILE)));
-  const sr = surfaceRow[colClamped];
-  const depth = Math.max(0, pcRow-sr);
-  document.getElementById('depth-val').textContent = depth+'m';
+  const depth = Math.max(0, pcRow-surfaceRow[colClamped]);
+  hudSet('depth', hudEls.depth, depth+'m');
   if(depth > (state.maxDepthReached||0)) state.maxDepthReached = depth;
-  document.getElementById('drone-val').textContent = DRONE_COUNT_TIERS[state.droneCountTier].count+'/'+MAX_DRONES;
+  const droneCount = DRONE_COUNT_TIERS[state.droneCountTier].count;
+  hudSet('drones', hudEls.drones, droneCount+'/'+MAX_DRONES);
+  hudSet('compact', hudEls.compact, '⛏ '+pickShort+'  ·  ⬇ '+depth+'m  ·  🤖 '+droneCount);
 
   let mining_=0, flying=0, returning=0, dumping=0, chestOpening=0;
-  drones.forEach(d=>{
-    if(!d.active) return;
+  for(let i=0;i<drones.length;i++){
+    const d=drones[i]; if(!d.active) continue;
     if(d.state==='mining') mining_++;
     else if(d.state==='opening_chest') chestOpening++;
     else if(d.state==='flying') flying++;
     else if(d.state==='returning') returning++;
     else if(d.state==='dumping') dumping++;
-  });
-  const activityEl = document.getElementById('drone-activity');
-  if(mining_+flying+returning+dumping+chestOpening>0){
-    activityEl.textContent = `⛏${mining_} 🎁${chestOpening} ✈${flying} ↩${returning} 📥${dumping}`;
-  } else {
-    activityEl.textContent = '';
   }
+  hudSet('activity', hudEls.activity, (mining_+flying+returning+dumping+chestOpening>0)
+    ? `⛏${mining_} 🎁${chestOpening} ✈${flying} ↩${returning} 📥${dumping}` : '');
 
-  const invList = document.getElementById('inv-list');
-  invList.innerHTML='';
-  const BASE8 = ['grass','dirt','stone','coal','iron','gold','emerald','diamond'];
-  MATERIAL_ORDER.concat(['totem']).forEach(key=>{
-    const qty = state.inventory[key]||0;
-    const isBase = BASE8.includes(key);
-    if(!isBase && qty===0) return;
-    const meta = MATERIAL_META[key];
-    const row = document.createElement('div');
-    row.className='inv-row';
-    const cap = bagCapacity();
-    row.innerHTML = `<div class="inv-swatch" style="background:${meta.color}"></div><div class="inv-name">${meta.name}</div><div class="inv-qty${qty>=cap?' full':''}">${qty}/${cap}</div>`;
-    invList.appendChild(row);
-  });
-  document.getElementById('inv-total').textContent = 'Bolsa: '+bagCapacity()+' de cada tipo';
+  const cap = bagCapacity();
+  let anyFull=false;
+  for(const key in invRows){
+    const r = invRows[key], qty = state.inventory[key]||0;
+    const text = qty+'/'+cap, full = qty>=cap;
+    if(full) anyFull=true;
+    if(r.text!==text){ r.text=text; r.q.textContent=text; }
+    if(r.full!==full){ r.full=full; r.q.classList.toggle('full',full); }
+    if(!INV_BASE8.includes(key)){
+      const show = qty>0;
+      if(r.shown!==show){ r.shown=show; r.row.style.display = show ? '' : 'none'; }
+    }
+  }
+  hudSet('invTotal', hudEls.invTotal, 'Bolsa: '+cap+' de cada tipo');
+  if(hudLast.anyFull!==anyFull){ hudLast.anyFull=anyFull; hudEls.invToggle.classList.toggle('alert',anyFull); }
 }
+
+// compact HUD: tap the stats chip to expand it; the backpack button shows/hides the inventory
+document.getElementById('stats-box').addEventListener('click', ()=>{
+  if(document.body.classList.contains('compact')) document.getElementById('stats-box').classList.toggle('open');
+});
+document.getElementById('inv-toggle').addEventListener('click', ()=> document.body.classList.toggle('inv-open'));
 
 /* ============================================================
    RENDERING
    ============================================================ */
+let skyGrad=null, skyGradH=0;
 function drawBackground(){
-  const g = ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#4fb8dd'); g.addColorStop(0.6,'#a9e0ee'); g.addColorStop(1,'#dff3f0');
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  if(!skyGrad || skyGradH!==H){   // built once per window height, not every frame
+    skyGrad = ctx.createLinearGradient(0,0,0,H);
+    skyGrad.addColorStop(0,'#4fb8dd'); skyGrad.addColorStop(0.6,'#a9e0ee'); skyGrad.addColorStop(1,'#dff3f0'); skyGradH=H;
+  }
+  ctx.fillStyle=skyGrad; ctx.fillRect(0,0,W,H);
   ctx.fillStyle='rgba(255,247,214,0.9)';
   ctx.beginPath(); ctx.arc(W*0.82,H*0.15,40,0,Math.PI*2); ctx.fill();
   drawHillLayer(camX*0.15, H*0.55, 90, '#7fbfd6', 0.35);
@@ -1804,51 +2032,92 @@ function drawTreeLayer(offset, baseY){
   }
   ctx.restore();
 }
-function drawCaveBackdrop(){
-  const colStart=Math.max(0,Math.floor(camX/TILE)-1), colEnd=Math.min(COLS-1,Math.ceil((camX+W)/TILE)+1);
-  const rowStart=Math.max(0,Math.floor(camY/TILE)-1), rowEnd=Math.min(ROWS-1,Math.ceil((camY+H)/TILE)+1);
-  for(let r=rowStart;r<=rowEnd;r++) for(let c=colStart;c<=colEnd;c++){
-    const sr = surfaceRow[Math.max(0,Math.min(COLS-1,c))];
-    if(r>=sr){
-      const d = r-sr;
-      let bg = '#241a12';
-      if(d>=PROFUNDEZAS_START_DEPTH) bg='#050406';
-      else if(d>=DEEP_START_DEPTH) bg='#0e0b10';
-      ctx.fillStyle = bg;
-      ctx.fillRect(c*TILE-camX, r*TILE-camY, TILE, TILE);
-    }
-  }
-}
-function drawTile(col,row){
+// ---- tile layer cache --------------------------------------------------------------------------
+// Blocks used to be redrawn (several fillRect calls each) for the whole screen EVERY frame. They are now
+// painted into an offscreen canvas that only covers the visible area; per frame we just blit it. It is
+// repainted when the camera crosses into another tile, and single cells are repainted when a block
+// changes (player, drone, area-break...), so drones mining at full speed don't force full redraws.
+function paintCell(c, x, y, col, row){
   const type = grid[row][col];
+  c.clearRect(x,y,TILE,TILE);
+  const sr = surfaceRow[col];
+  if(row>=sr){                                    // underground backdrop (mined tunnels read as caves)
+    const d = row-sr;
+    c.fillStyle = d>=PROFUNDEZAS_START_DEPTH ? '#050406' : (d>=DEEP_START_DEPTH ? '#0e0b10' : '#241a12');
+    c.fillRect(x,y,TILE,TILE);
+  }
   if(type===B.EMPTY) return;
   const data = BLOCK_DATA[type];
-  const sx=col*TILE-camX, sy=row*TILE-camY;
-  ctx.fillStyle=data.color; ctx.fillRect(sx,sy,TILE,TILE);
-  ctx.fillStyle=data.edge; ctx.fillRect(sx,sy,TILE,3); ctx.fillRect(sx,sy,3,TILE);
-  ctx.globalAlpha=0.18; ctx.fillRect(sx+TILE-4,sy,4,TILE); ctx.fillRect(sx,sy+TILE-4,TILE,4); ctx.globalAlpha=1;
+  c.fillStyle=data.color; c.fillRect(x,y,TILE,TILE);
+  c.fillStyle=data.edge; c.fillRect(x,y,TILE,3); c.fillRect(x,y,3,TILE);
+  c.globalAlpha=0.18; c.fillRect(x+TILE-4,y,4,TILE); c.fillRect(x,y+TILE-4,TILE,4); c.globalAlpha=1;
   if(type===B.OBSIDIAN){
-    ctx.fillStyle='rgba(180,120,255,0.35)';
-    ctx.fillRect(sx+6,sy+6,5,5); ctx.fillRect(sx+21,sy+16,4,4);
+    c.fillStyle='rgba(180,120,255,0.35)';
+    c.fillRect(x+6,y+6,5,5); c.fillRect(x+21,y+16,4,4);
   }
   if(type===B.DARKSTONE){
-    ctx.fillStyle='rgba(0,0,0,0.3)';
-    ctx.fillRect(sx+5,sy+20,10,4); ctx.fillRect(sx+18,sy+7,9,4);
+    c.fillStyle='rgba(0,0,0,0.3)';
+    c.fillRect(x+5,y+20,10,4); c.fillRect(x+18,y+7,9,4);
   }
   if(isProfundezas(type)){
-    ctx.fillStyle='rgba(0,0,0,0.45)';
-    ctx.fillRect(sx+4,sy+6,12,3); ctx.fillRect(sx+14,sy+22,14,3); ctx.fillRect(sx+2,sy+16,8,3);
+    c.fillStyle='rgba(0,0,0,0.45)';
+    c.fillRect(x+4,y+6,12,3); c.fillRect(x+14,y+22,14,3); c.fillRect(x+2,y+16,8,3);
   }
   if(data.value>=4){
-    ctx.fillStyle='rgba(255,255,255,0.55)';
-    ctx.fillRect(sx+8,sy+9,3,3); ctx.fillRect(sx+20,sy+18,3,3);
+    c.fillStyle='rgba(255,255,255,0.55)';
+    c.fillRect(x+8,y+9,3,3); c.fillRect(x+20,y+18,3,3);
   }
 }
+// Ring-buffer layout: tile (col,row) always lives at cache cell (col mod cols, row mod rows). Scrolling the
+// camera therefore never moves pixels around - only the strip of tiles that just entered the view is painted,
+// and the blit stitches the (up to) four pieces back together.
+const mod = (a,n)=>((a%n)+n)%n;
+function tileCacheEnsure(){
+  const tc = tileCache;
+  const col0=Math.floor(camX/TILE)-1, row0=Math.floor(camY/TILE)-1;
+  const cols=Math.ceil(W/TILE)+3, rows=Math.ceil(H/TILE)+3;
+  if(!tc.cv){ tc.cv=document.createElement('canvas'); tc.cx=tc.cv.getContext('2d'); }
+  const needW=Math.ceil(cols*TILE*DPR), needH=Math.ceil(rows*TILE*DPR);
+  const resized = tc.cv.width!==needW || tc.cv.height!==needH;
+  if(resized){ tc.cv.width=needW; tc.cv.height=needH; }
+  if(!resized && tc.valid && tc.col0===col0 && tc.row0===row0) return;       // the common case: nothing to do
+  const c=tc.cx; c.setTransform(DPR,0,0,DPR,0,0);
+  const oc0=tc.col0, or0=tc.row0;
+  const incremental = !resized && tc.valid && Math.abs(col0-oc0)<cols && Math.abs(row0-or0)<rows;
+  tc.col0=col0; tc.row0=row0; tc.cols=cols; tc.rows=rows;
+  for(let r=0;r<rows;r++){
+    const row=row0+r, rowIsNew = !incremental || row<or0 || row>=or0+rows;
+    const y=mod(row,rows)*TILE;
+    for(let q=0;q<cols;q++){
+      const col=col0+q;
+      if(!rowIsNew && col>=oc0 && col<oc0+cols) continue;                    // already painted in the previous window
+      const x=mod(col,cols)*TILE;
+      if(row<0||row>=ROWS||col<0||col>=COLS){ c.clearRect(x,y,TILE,TILE); continue; }
+      paintCell(c,x,y,col,row);
+    }
+  }
+  tc.valid=true;
+}
+function invalidateTile(col,row){            // repaint just this cell inside the cache (if it is currently cached)
+  const tc=tileCache;
+  if(!tc.valid) return;
+  if(col<tc.col0||col>=tc.col0+tc.cols||row<tc.row0||row>=tc.row0+tc.rows) return;
+  tc.cx.setTransform(DPR,0,0,DPR,0,0);
+  paintCell(tc.cx,mod(col,tc.cols)*TILE,mod(row,tc.rows)*TILE,col,row);
+}
+// stitch the ring buffer back into reading order: split at the wrap column/row (1 to 4 pieces)
+function blitTileCache(target){
+  const tc=tileCache, ox=mod(tc.col0,tc.cols), oy=mod(tc.row0,tc.rows);
+  const dx0=tc.col0*TILE-camX, dy0=tc.row0*TILE-camY;
+  const xs=[[ox,tc.cols-ox,0],[0,ox,tc.cols-ox]], ys=[[oy,tc.rows-oy,0],[0,oy,tc.rows-oy]];
+  for(const [sy,sh,dyT] of ys){ if(sh<=0) continue;
+    for(const [sx,sw,dxT] of xs){ if(sw<=0) continue;
+      target.drawImage(tc.cv, sx*TILE*DPR, sy*TILE*DPR, sw*TILE*DPR, sh*TILE*DPR, dx0+dxT*TILE, dy0+dyT*TILE, sw*TILE, sh*TILE);
+    } }
+}
 function drawWorld(){
-  drawCaveBackdrop();
-  const colStart=Math.max(0,Math.floor(camX/TILE)-1), colEnd=Math.min(COLS-1,Math.ceil((camX+W)/TILE)+1);
-  const rowStart=Math.max(0,Math.floor(camY/TILE)-1), rowEnd=Math.min(ROWS-1,Math.ceil((camY+H)/TILE)+1);
-  for(let r=rowStart;r<=rowEnd;r++) for(let c=colStart;c<=colEnd;c++) drawTile(c,r);
+  tileCacheEnsure();
+  blitTileCache(ctx);
 
   if(mining){
     const sx=mining.col*TILE-camX, sy=mining.row*TILE-camY;
@@ -1861,6 +2130,12 @@ function drawWorld(){
       ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.fillRect(sx,sy,TILE,TILE*(1-mining.progress));
       ctx.strokeStyle='#ffe27a'; ctx.lineWidth=2; ctx.strokeRect(sx+1,sy+1,TILE-2,TILE-2);
     }
+  }
+  // virtual aim reticle (touch): shows exactly which block the aim stick / mine button will hit
+  if(aimPreview && !(mining && mining.col===aimPreview.col && mining.row===aimPreview.row)){
+    const sx=aimPreview.col*TILE-camX, sy=aimPreview.row*TILE-camY;
+    ctx.save(); ctx.strokeStyle='rgba(255,226,122,0.95)'; ctx.lineWidth=2; ctx.setLineDash([5,4]);
+    ctx.strokeRect(sx+2,sy+2,TILE-4,TILE-4); ctx.restore();
   }
 }
 function drawChests(){
@@ -1878,7 +2153,7 @@ function drawChests(){
 }
 function drawPromptAbove(cx, sy, label){
   ctx.font="13px 'Silkscreen', monospace";
-  const text='Pressione '+label;
+  const text = touchState.ui ? 'Toque em INTERAGIR' : 'Pressione '+label;
   const tw=ctx.measureText(text).width+16;
   ctx.fillStyle='rgba(20,14,9,0.75)'; ctx.fillRect(cx-tw/2, sy-28, tw, 22);
   ctx.fillStyle='#ffd257'; ctx.textAlign='center'; ctx.fillText(text, cx, sy-12); ctx.textAlign='left';
@@ -2055,8 +2330,15 @@ function drawParticles(dt){
    MAIN LOOP
    ============================================================ */
 let lastTime = performance.now();
+let lastPlaying=false, lastInteractLabel='';
+const mainMenuEl = document.getElementById('main-menu');
+const interactBtnEl = document.getElementById('btn-interact');
+const PROF = { upd:[], draw:[], hud:[] };
 function frame(now){
   let dt=(now-lastTime)/1000; if(dt>0.05) dt=0.05; lastTime=now;
+  const t0=performance.now();
+
+  if(gameStarted!==lastPlaying){ lastPlaying=gameStarted; document.body.classList.toggle('playing',gameStarted); }
 
   if(gameStarted){
     updateDrones(dt);
@@ -2069,11 +2351,18 @@ function frame(now){
 
   const targetCamX=(player.x+player.w/2)-W/2;
   const targetCamY=(player.y+player.h/2)-H/2;
-  camX += (targetCamX-camX)*Math.min(1,dt*6);
-  camY += (targetCamY-camY)*Math.min(1,dt*6);
-  camX = Math.max(-100, Math.min(camX, COLS*TILE-W+100));
-  camY = Math.max(-150, Math.min(camY, ROWS*TILE-H+150));
+  camFX += (targetCamX-camFX)*Math.min(1,dt*6);
+  camFY += (targetCamY-camFY)*Math.min(1,dt*6);
+  camFX = Math.max(-100, Math.min(camFX, COLS*TILE-W+100));
+  camFY = Math.max(-150, Math.min(camFY, ROWS*TILE-H+150));
+  camX = Math.round(camFX*DPR)/DPR;
+  camY = Math.round(camFY*DPR)/DPR;
 
+  const t1=performance.now();
+  if(mainMenuEl.style.display!=='none'){
+    // the main menu fully covers the game canvas: don't spend CPU/battery drawing it
+    requestAnimationFrame(frame); return;
+  }
   drawBackground();
   drawWorld();
   drawChests();
@@ -2086,16 +2375,29 @@ function frame(now){
   drawPlayer();
   drawFloatingTexts(dt);
   drawParticles(dt);
+  const t2=performance.now();
   updateHUD();
+  if(PROF.on){ const t3=performance.now(); PROF.upd.push(t1-t0); PROF.draw.push(t2-t1); PROF.hud.push(t3-t2); }
+
+  if(touchState.ui){                       // contextual INTERAGIR button: only visible when something can be used
+    const it = interactTarget(), label = it ? it.label : '';
+    if(label!==lastInteractLabel){
+      lastInteractLabel=label;
+      interactBtnEl.textContent = label ? 'INTERAGIR · '+label : '';
+      interactBtnEl.classList.toggle('show', !!label);
+    }
+  }
 
   saveTimer += dt;
-  if(saveTimer>2){ saveTimer=0; autoSave(); }
+  forceSaveTimer += dt;
+  if(saveTimer>2){ saveTimer=0; if(saveDirty || forceSaveTimer>10){ saveDirty=false; forceSaveTimer=0; autoSave(); } }
 
   requestAnimationFrame(frame);
 }
 
 // No slot is auto-loaded on page open - the player picks "Continuar" or a slot explicitly.
 // We just generate a neutral default mountain so there's something to see behind the main menu.
+applyLayoutMode();
 migrateLegacySaveIfNeeded();
 rand = mulberry32(state.worldSeed || 20261);
 buildSurface();
@@ -2104,6 +2406,9 @@ buildChests();
 updateHUD();
 requestAnimationFrame(frame);
 window.addEventListener('beforeunload', autoSave);
+// phones often never fire beforeunload: save when the tab/app goes to the background or is closed
+window.addEventListener('pagehide', autoSave);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') autoSave(); });
 
 /* ============================================================
    DEBUG / TESTING HELPERS (console only, no gameplay effect otherwise)
@@ -2122,6 +2427,39 @@ window.setMoney = function(amount){
   return state.money;
 };
 window.debugState = function(){ return state; };
+window.debugDroneStats = droneStats;
+window.debugProfile = function(on){ if(on===true){ PROF.on=true; PROF.upd.length=PROF.draw.length=PROF.hud.length=0; return null; } PROF.on=false; const q=(a,f)=>{ const b=a.slice().sort((x,y)=>x-y); return +(b[Math.floor(b.length*f)]||0).toFixed(2); }; const o={}; for(const k of ['upd','draw','hud']){ const a=PROF[k]; o[k]={avg:+(a.reduce((x,y)=>x+y,0)/Math.max(1,a.length)).toFixed(2),p95:q(a,0.95),max:+(Math.max(0,...a)).toFixed(1)}; } return o; };
+// ---- test-only helpers (console): inspect/prepare touch input and the world ----
+window.debugTouch = function(){ return Object.assign({}, touchState, { aimDir:Object.assign({},aimDir), preview: aimPreview?Object.assign({},aimPreview):null }); };
+window.debugSetPlayer = function(x,y){ player.x=x; player.y=y; player.vx=0; player.vy=0; };
+window.debugFill = function(c0,r0,c1,r1,key){ const t=B[key]; for(let r=r0;r<=r1;r++) for(let c=c0;c<=c1;c++){ grid[r][c]=t; minedTilesSet.delete(c+','+r); } tileCache.valid=false; };
+window.debugVerifyTileCache = function(){
+  tileCacheEnsure(); const tc=tileCache;
+  const ref=document.createElement('canvas'); ref.width=tc.cv.width; ref.height=tc.cv.height; const rc=ref.getContext('2d'); rc.setTransform(DPR,0,0,DPR,0,0);
+  for(let r=0;r<tc.rows;r++){ const row=tc.row0+r; for(let q=0;q<tc.cols;q++){ const col=tc.col0+q, x=mod(col,tc.cols)*TILE, y=mod(row,tc.rows)*TILE;
+    if(row<0||row>=ROWS||col<0||col>=COLS) rc.clearRect(x,y,TILE,TILE); else paintCell(rc,x,y,col,row); } }
+  const a=tc.cx.getImageData(0,0,tc.cv.width,tc.cv.height).data, b=rc.getImageData(0,0,ref.width,ref.height).data;
+  let bad=0; for(let i=0;i<a.length;i+=4){ if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]||a[i+3]!==b[i+3]) bad++; }
+  return { pixels:a.length/4, mismatched:bad };
+};
+// final-image check: the stitched ring buffer must equal painting every visible tile directly at its screen position
+window.debugVerifyBlit = function(){
+  tileCacheEnsure();
+  const mk=()=>{ const c=document.createElement('canvas'); c.width=Math.ceil(W*DPR); c.height=Math.ceil(H*DPR); const x=c.getContext('2d'); x.setTransform(DPR,0,0,DPR,0,0); x.imageSmoothingEnabled=false; return [c,x]; };
+  const [ca,xa]=mk(), [cb,xb]=mk();
+  blitTileCache(xa);
+  const c0=Math.floor(camX/TILE)-1, r0=Math.floor(camY/TILE)-1, nc=Math.ceil(W/TILE)+3, nr=Math.ceil(H/TILE)+3;
+  for(let r=0;r<nr;r++) for(let q=0;q<nc;q++){ const row=r0+r, col=c0+q; if(row<0||row>=ROWS||col<0||col>=COLS) continue; paintCell(xb,col*TILE-camX,row*TILE-camY,col,row); }
+  const A=xa.getImageData(0,0,ca.width,ca.height).data, B=xb.getImageData(0,0,cb.width,cb.height).data;
+  let bad=0; for(let i=0;i<A.length;i+=4){ if(A[i]!==B[i]||A[i+1]!==B[i+1]||A[i+2]!==B[i+2]||A[i+3]!==B[i+3]) bad++; }
+  return { pixels:A.length/4, mismatched:bad };
+};
+window.debugCarve = function(c0,r0,c1,r1){ for(let r=r0;r<=r1;r++) for(let c=c0;c<=c1;c++){ grid[r][c]=B.EMPTY; } tileCache.valid=false; };
+window.debugDroneMined = function(){ return Object.assign({}, droneMined); };
+window.debugPrices = function(){ return Object.assign({}, PRICES); };
+window.debugSales = function(){ return salesLog.map(x=>JSON.parse(JSON.stringify(x))); };
+// test helper: load a drone with a lot and send it to sell it
+window.debugLoadDrone = function(id, lot){ const d=drones[id]; if(!d||!d.active) return false; releaseDroneTarget(d); d.carried=Object.assign({},lot); d.carriedTotal=Object.values(lot).reduce((a,b)=>a+b,0); d.state='returning'; return true; };
 window.debugTile = function(col,row){ return tileAt(col,row); };
 window.debugDrones = function(){ return drones.filter(d=>d.active).map(d=>({id:d.id,state:d.state,carried:d.carriedTotal,x:Math.round(d.x),y:Math.round(d.y),tt:d.targetType})); };
 window.debugPlayer = function(){ return {x:player.x,y:player.y,col:Math.floor((player.x+player.w/2)/TILE),feetRow:Math.floor((player.y+player.h)/TILE),camX:camX,camY:camY}; };

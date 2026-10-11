@@ -31,14 +31,16 @@
   --drop:0 7px 0 0 rgba(0,0,0,.38);
 }
 
-html,body{ height:100%; }
+html,body{ height:100%; overscroll-behavior:none; }
 *{ box-sizing:border-box; }
 body{
   margin:0; overflow:hidden; background:#0d0905; font-family:var(--font-txt); font-size:18px; color:var(--cream);
-  -webkit-user-select:none; user-select:none; touch-action:none;
+  -webkit-user-select:none; user-select:none; touch-action:none; -webkit-touch-callout:none;
+  position:fixed; inset:0; width:100%;
 }
 #game-root{ position:relative; width:100vw; height:100%; min-height:100dvh; overflow:hidden; }
 canvas{
+  touch-action:none;
   display:block; position:absolute; top:0; left:0; width:100%; height:100%;
   image-rendering:pixelated; image-rendering:crisp-edges; cursor:crosshair;
 }
@@ -47,7 +49,7 @@ canvas{
 /* ---------------------------------------------------------------------
    Shared button look (wood plank): normal / hover / pressed / disabled
    --------------------------------------------------------------------- */
-.menu-btn,.modal-btn,.pick-buy,.slot-btn,.tab-btn,#surface-btn,#menu-btn,.touch-btn{
+.menu-btn,.modal-btn,.pick-buy,.slot-btn,.tab-btn,#surface-btn,#menu-btn,.tbtn,#inv-toggle{
   font-family:var(--font-ui); color:var(--cream); text-shadow:0 2px 0 var(--ink);
   border:0; border-radius:0; cursor:pointer; position:relative;
   background-color:var(--wood-2); background-image:var(--tex-wood); background-size:64px 64px; image-rendering:pixelated;
@@ -55,10 +57,10 @@ canvas{
   transition:transform .07s steps(2), filter .1s;
   -webkit-tap-highlight-color:transparent;
 }
-.menu-btn:hover,.modal-btn:hover,.pick-buy:hover:not(:disabled),.slot-btn:hover,.tab-btn:hover,#surface-btn:hover,#menu-btn:hover,.touch-btn:hover{
+.menu-btn:hover,.modal-btn:hover,.pick-buy:hover:not(:disabled),.slot-btn:hover,.tab-btn:hover,#surface-btn:hover,#menu-btn:hover,.tbtn:hover,#inv-toggle:hover{
   filter:brightness(1.15); transform:translateY(-2px);
 }
-.menu-btn:active,.modal-btn:active,.pick-buy:active:not(:disabled),.slot-btn:active,.tab-btn:active,#surface-btn:active,#menu-btn:active,.touch-btn:active{
+.menu-btn:active,.modal-btn:active,.pick-buy:active:not(:disabled),.slot-btn:active,.tab-btn:active,#surface-btn:active,#menu-btn:active,.tbtn:active,#inv-toggle:active{
   transform:translateY(3px); filter:brightness(.94); box-shadow:var(--notch), var(--bevel-down);
 }
 .menu-btn:disabled,.modal-btn:disabled,.pick-buy:disabled,.slot-btn:disabled{
@@ -124,24 +126,17 @@ canvas{
 }
 #toast.show{ opacity:1; }
 
-/* touch controls */
-#joystick-wrap{
-  position:absolute; bottom:calc(20px + env(safe-area-inset-bottom,0px)); left:20px; right:20px;
-  display:flex; justify-content:space-between; align-items:flex-end; pointer-events:none; z-index:6;
-}
-.touch-btn{ pointer-events:auto; width:58px; height:58px; font-size:22px; display:flex; align-items:center; justify-content:center; background-color:var(--soil-1); background-image:var(--tex-stone); }
-#dpad{ display:flex; gap:12px; pointer-events:auto; }
-#minebtn{ background-color:var(--danger); }
-
 /* ---------------------------------------------------------------------
    Overlays / panels: dirt block with a wooden frame and a grass top edge
    --------------------------------------------------------------------- */
 .overlay{
   position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:60; text-align:center;
   background:radial-gradient(ellipse at center, rgba(12,8,4,.58) 0%, rgba(12,8,4,.86) 100%);
+  padding:calc(8px + var(--st)) calc(8px + var(--sr)) calc(8px + var(--sb)) calc(8px + var(--sl));
 }
 .modal-panel{
-  position:relative; width:min(600px,92vw); max-height:88vh; overflow-y:auto; padding:30px 24px 26px;
+  position:relative; width:min(600px,100%); max-height:100%; overflow-y:auto; padding:30px 24px 26px;
+  touch-action:pan-y; overscroll-behavior:contain;
   background-color:var(--soil-1);
   background-image:linear-gradient(transparent 0 9px, var(--grass-1) 9px 14px, var(--grass-3) 14px 18px, transparent 18px), var(--tex-dirt);
   background-size:100% 100%, 64px 64px; image-rendering:pixelated;
@@ -163,6 +158,12 @@ canvas{
   background-image:linear-gradient(var(--grass-1) 0 4px, var(--grass-3) 4px 7px, transparent 7px), var(--tex-wood);
   background-size:100% 100%, 64px 64px;
 }
+.machines-summary{ display:flex; flex-direction:column; gap:6px; margin:0 0 14px; text-align:left; }
+.machines-summary .chip{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; padding:7px 10px; background:rgba(0,0,0,.3); border:2px solid #2a190b; font-size:15px; }
+.machines-summary .chip b{ font-family:var(--font-ui); font-size:11px; color:var(--gold); min-width:104px; }
+.machines-summary .chip span{ color:var(--cream); flex:1 1 150px; }
+.machines-summary .chip small{ color:var(--muted); font-size:14px; }
+.machines-summary .chip em{ color:var(--muted); font-style:normal; font-size:14px; }
 .money-line{ text-align:center; color:var(--gold); font-size:20px; margin-bottom:12px; text-shadow:0 2px 0 var(--ink); }
 
 /* shop / upgrade rows */
@@ -285,4 +286,137 @@ canvas{
   #main-menu .subtitle{ display:none; }
   .menu-buttons{ gap:8px; }
   .modal-panel{ max-height:94vh; }
+}
+
+/* =====================================================================
+   Scrollable windows: header, tabs and close button stay visible; only the list scrolls
+   ===================================================================== */
+:root{
+  --ctl:clamp(104px,30vmin,168px);   /* joystick size */
+  --tb:clamp(58px,16vmin,84px);      /* round button size */
+  --st:env(safe-area-inset-top,0px); --sb:env(safe-area-inset-bottom,0px);
+  --sl:env(safe-area-inset-left,0px); --sr:env(safe-area-inset-right,0px);
+}
+.modal-panel.has-list{ display:flex; flex-direction:column; overflow:hidden; }
+.modal-panel.has-list > h2, .modal-panel.has-list > .money-line, .modal-panel.has-list > .tabs-row,
+.modal-panel.has-list > .machines-summary, .modal-panel.has-list > .modal-btn, .modal-panel.has-list > #trit-total-line,
+.modal-panel.has-list > #trit-confirm{ flex:none; }
+.modal-panel.has-list > div[id$="-list"]{
+  flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; touch-action:pan-y;
+  -webkit-overflow-scrolling:touch; padding:2px 4px 6px 2px;
+}
+#surface-btn .ico,#menu-btn .ico{ display:block; }
+#inv-toggle,#stats-compact{ display:none; }
+#inv-toggle{ position:relative; }
+#inv-toggle i{ display:none; position:absolute; top:-6px; right:-6px; width:14px; height:14px; background:var(--danger); border:3px solid var(--ink); }
+#inv-toggle.alert i{ display:block; }
+
+/* =====================================================================
+   Virtual controls (touch): left stick = move (+ jump button), right stick = aim (+ mine button)
+   ===================================================================== */
+#touch-ui{ display:none; position:absolute; inset:0; z-index:6; pointer-events:none; }
+body.touch-ui.playing #touch-ui{ display:block; }
+.stick{
+  position:absolute; bottom:calc(14px + var(--sb)); width:calc(var(--ctl)*1.25); height:calc(var(--ctl)*1.25);
+  display:flex; align-items:center; justify-content:center; pointer-events:auto; touch-action:none;
+}
+#stick-move{ left:calc(10px + var(--sl)); }
+#stick-aim{ right:calc(10px + var(--sr)); }
+.stick-base{
+  position:relative; width:var(--ctl); height:var(--ctl); border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(122,75,34,.34) 0 36%, rgba(21,13,7,.5) 100%);
+  box-shadow:0 0 0 4px rgba(21,13,7,.85), inset 0 0 0 3px rgba(255,255,255,.14);
+  display:flex; align-items:center; justify-content:center;
+}
+.stick-knob{
+  width:42%; height:42%; border-radius:50%; background-color:var(--wood-1); background-image:var(--tex-wood); background-size:64px 64px;
+  box-shadow:0 0 0 3px var(--ink), inset 0 3px 0 rgba(255,255,255,.28), inset 0 -4px 0 rgba(0,0,0,.3);
+}
+#stick-aim .stick-knob{ background-color:var(--danger); }
+.stick.active .stick-base{ box-shadow:0 0 0 4px var(--gold), inset 0 0 0 3px rgba(255,255,255,.2); }
+.tbtn{
+  position:absolute; pointer-events:auto; touch-action:none; width:var(--tb); height:var(--tb); padding:0;
+  display:flex; align-items:center; justify-content:center; font-size:calc(var(--tb)*.42); border-radius:50%;
+}
+.tbtn:hover{ transform:none; filter:none; }
+.tbtn.down{ transform:translateY(3px); filter:brightness(.92); box-shadow:var(--notch), var(--bevel-down); }
+#btn-jump{ left:calc(10px + var(--sl) + (var(--ctl)*1.25 - var(--tb))/2); bottom:calc(14px + var(--sb) + var(--ctl)*1.25 + 8px); }
+#btn-mine{
+  right:calc(10px + var(--sr) + (var(--ctl)*1.25 - var(--tb)*1.1)/2); bottom:calc(14px + var(--sb) + var(--ctl)*1.25 + 8px);
+  width:calc(var(--tb)*1.1); height:calc(var(--tb)*1.1); background-color:var(--danger);
+}
+#btn-interact{
+  display:none; left:0; right:0; margin:0 auto; width:max-content; max-width:46vw; height:auto; min-height:48px; padding:10px 14px;
+  bottom:calc(18px + var(--sb)); border-radius:0; font-size:11px; background-color:var(--grass-2); text-align:center; line-height:1.3;
+}
+#btn-interact.show{ display:flex; }
+
+/* =====================================================================
+   Compact layout: phones, tablets and small windows (the game area stays the main thing)
+   ===================================================================== */
+body.compact #hud{ top:calc(8px + var(--st)); left:calc(8px + var(--sl)); right:calc(8px + var(--sr)); }
+body.compact .hud-panel{ padding:6px 10px; }
+body.compact #money-box{ font-size:17px; }
+body.compact #money-box .pixel-font{ font-size:11px; }
+body.compact #stats-box{ min-width:0; max-width:62vw; font-size:13px; cursor:pointer; }
+body.compact #stats-compact{ display:block; font-family:var(--font-ui); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+body.compact #stats-full{ display:none; }
+body.compact #stats-box.open #stats-full{ display:block; margin-top:6px; padding-top:6px; border-top:2px dashed var(--wood-2); }
+body.compact #hint{ display:none; }
+body.compact #toast{ top:calc(104px + var(--st)); max-width:92vw; font-size:16px; padding:8px 14px; }
+body.compact #menu-btn, body.compact #surface-btn, body.compact #inv-toggle{
+  position:absolute; top:calc(52px + var(--st)); right:auto; bottom:auto; width:44px; height:44px; padding:0; z-index:6;
+  display:flex; align-items:center; justify-content:center; font-size:20px; pointer-events:auto;
+}
+body.compact #menu-btn{ left:calc(8px + var(--sl)); }
+body.compact #surface-btn{ left:calc(8px + var(--sl) + 52px); }
+body.compact #inv-toggle{ left:calc(8px + var(--sl) + 104px); }
+body.compact #menu-btn .lbl, body.compact #surface-btn .lbl{ display:none; }
+body.compact #inv-panel{
+  display:none; left:calc(8px + var(--sl)); top:calc(104px + var(--st)); transform:none; width:min(236px,66vw); max-height:46vh; padding:10px;
+}
+body.compact.inv-open #inv-panel{ display:block; }
+body.compact.inv-open #inv-toggle{ filter:brightness(1.25); }
+
+/* touch-friendly targets inside menus and shops */
+body.compact .pick-row{ flex-wrap:wrap; }
+body.compact .pick-info{ flex:1 1 130px; }
+body.compact .pick-buy{ min-height:44px; min-width:96px; }
+body.compact .slot-btn{ min-height:42px; padding:9px 12px; }
+body.compact .tab-btn{ min-height:42px; display:flex; align-items:center; }
+body.compact .modal-btn{ min-height:46px; }
+body.compact .machines-summary{ flex-direction:row; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+body.compact .machines-summary .chip{ flex:1 1 28%; flex-direction:column; align-items:flex-start; gap:1px; padding:5px 7px; font-size:12px; line-height:1.15; }
+body.compact .machines-summary .chip b{ font-size:9px; }
+body.compact .machines-summary .chip span{ flex:none; }
+body.compact .machines-summary .chip b{ min-width:0; }
+body.compact .machines-summary .chip em, body.compact .machines-summary .chip small{ display:none; }
+body.compact .modal-panel{ padding:26px 12px 14px; }
+body.compact .modal-panel h2{ font-size:16px; margin:2px 0 10px; }
+body.compact .money-line{ font-size:17px; margin-bottom:8px; }
+body.compact .tabs-row{ gap:6px; margin-bottom:10px; }
+
+/* short screens (phones in landscape): squeeze the window chrome so the list gets the room */
+@media (max-height:520px){
+  body.compact .tab-btn{ min-height:34px; padding:6px 10px; }
+  body.compact .modal-btn{ min-height:38px; margin-top:6px; padding:6px 16px; }
+  body.compact .modal-panel{ padding:20px 10px 8px; }
+  body.compact .modal-panel h2{ font-size:13px; margin:0 0 4px; }
+  body.compact .money-line{ font-size:14px; margin-bottom:4px; }
+  body.compact .tabs-row{ margin-bottom:6px; }
+  .modal-panel{ padding:22px 12px 10px; }
+  .modal-panel h2{ font-size:14px; margin:0 0 6px; }
+  .money-line{ font-size:15px; margin-bottom:6px; }
+  .tabs-row{ margin-bottom:8px; }
+  .modal-btn{ margin-top:8px; padding:8px 18px; }
+  .machines-summary{ display:none; }
+  .pick-row{ padding:7px; margin-bottom:7px; }
+  .pick-swatch{ width:36px; height:36px; }
+  .pick-swatch img{ width:28px; height:28px; }
+  .pick-info .name{ font-size:16px; }
+  .pick-info .desc{ font-size:12px; }
+}
+@media (max-width:420px){
+  .menu-btn{ width:min(380px,86vw); }
+  .tab-btn{ font-size:10px; padding:8px 8px; }
 }

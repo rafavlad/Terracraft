@@ -2,7 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>TerraCraft</title>
 <meta name="description" content="TerraCraft - jogo 2D de mineração e progressão em pixel art.">
 <meta name="application-name" content="TerraCraft">
@@ -25,37 +27,41 @@
       <span class="pixel-font">R$</span><span id="money-val">0</span>
     </div>
     <div class="hud-panel" id="stats-box">
-      <div class="row"><span class="label">PICARETA</span></div>
-      <div id="pick-name">Madeira</div>
-      <div class="row"><span class="label">PROFUNDIDADE</span><span id="depth-val">0m</span></div>
-      <div class="row"><span class="label">DRONES (MÁX. 40)</span><span id="drone-val">0/40</span></div>
-      <div id="drone-activity"></div>
+      <div id="stats-compact"></div>
+      <div id="stats-full">
+        <div class="row"><span class="label">PICARETA</span></div>
+        <div id="pick-name">Madeira</div>
+        <div class="row"><span class="label">PROFUNDIDADE</span><span id="depth-val">0m</span></div>
+        <div class="row"><span class="label">DRONES (MÁX. 40)</span><span id="drone-val">0/40</span></div>
+        <div id="drone-activity"></div>
+      </div>
     </div>
   </div>
 
+  <button id="inv-toggle" type="button" aria-label="Inventário"><span>🎒</span><i></i></button>
   <div id="inv-panel">
     <h3>INVENTÁRIO</h3>
     <div id="inv-list"></div>
     <div id="inv-total">10/10</div>
   </div>
 
-  <div id="surface-btn">VOLTAR À<br>SUPERFÍCIE</div>
-  <div id="menu-btn">☰<br>MENU</div>
+  <button id="surface-btn" type="button" aria-label="Voltar à superfície"><span class="ico">⌂</span><span class="lbl">VOLTAR À<br>SUPERFÍCIE</span></button>
+  <button id="menu-btn" type="button" aria-label="Menu"><span class="ico">☰</span><span class="lbl">MENU</span></button>
   <div id="hint">Setas/A-D: mover · Espaço: pular · Clique: minerar · E: interagir</div>
   <div id="toast"></div>
 
-  <div id="joystick-wrap">
-    <div id="dpad">
-      <div class="touch-btn" id="btn-left">◀</div>
-      <div class="touch-btn" id="btn-right">▶</div>
-      <div class="touch-btn" id="jumpbtn">▲</div>
-    </div>
-    <div class="touch-btn" id="minebtn">⛏</div>
+  <!-- virtual controls (shown only on touch devices / when enabled in Configurações) -->
+  <div id="touch-ui">
+    <div class="stick" id="stick-move" aria-label="Mover"><div class="stick-base"><div class="stick-knob"></div></div></div>
+    <button class="tbtn" id="btn-jump" type="button" aria-label="Pular">▲</button>
+    <button class="tbtn pill" id="btn-interact" type="button"></button>
+    <button class="tbtn" id="btn-mine" type="button" aria-label="Minerar">⛏</button>
+    <div class="stick" id="stick-aim" aria-label="Mirar"><div class="stick-base"><div class="stick-knob"></div></div></div>
   </div>
 
   <!-- BANCADA DE MELHORIAS -->
   <div class="overlay" id="shop-overlay">
-    <div class="modal-panel">
+    <div class="modal-panel has-list">
       <h2>BANCADA DE MELHORIAS</h2>
       <div class="money-line">Seu saldo: R$ <span id="shop-money-val">0</span></div>
       <div class="tabs-row" id="shop-tabs">
@@ -70,9 +76,10 @@
 
   <!-- BANCADA DE MÁQUINAS -->
   <div class="overlay" id="machines-overlay">
-    <div class="modal-panel">
+    <div class="modal-panel has-list">
       <h2>BANCADA DE MÁQUINAS</h2>
       <div class="money-line">Seu saldo: R$ <span id="machines-money-val">0</span></div>
+      <div id="machines-summary" class="machines-summary"></div>
       <div class="tabs-row" id="machines-tabs">
         <div class="tab-btn active" data-mtab="drones">🤖 DRONES</div>
         <div class="tab-btn" data-mtab="speed">⚡ VELOCIDADE</div>
@@ -85,7 +92,7 @@
 
   <!-- BANCADA DE ENCANTAMENTOS -->
   <div class="overlay" id="enchant-overlay">
-    <div class="modal-panel">
+    <div class="modal-panel has-list">
       <h2>BANCADA DE ENCANTAMENTOS</h2>
       <div class="money-line">Seu saldo: R$ <span id="enchant-money-val">0</span></div>
       <div class="tabs-row" id="enchant-tabs">
@@ -100,7 +107,7 @@
 
   <!-- TRITURADOR -->
   <div class="overlay" id="trit-overlay">
-    <div class="modal-panel">
+    <div class="modal-panel has-list">
       <h2>TRITURADOR</h2>
       <div id="trit-list"></div>
       <div id="trit-total-line"></div>
@@ -126,14 +133,16 @@
 
   <!-- INTRO -->
   <div class="overlay" id="intro-overlay">
-    <div class="modal-panel">
+    <div class="modal-panel has-list">
       <h2>UMA PROPOSTA INESPERADA</h2>
+<div id="intro-list">
       <p>Em uma bela manhã, você estava tranquilamente em sua casa quando, de repente, <b>MrBeast</b> bateu na sua porta.</p>
       <p>Ele perguntou: <i>"Você gostaria de ganhar 100 milhões de reais?"</i></p>
       <p>Você respondeu: <i>"Obviamente que sim!"</i></p>
       <p>Então ele explicou que havia apenas uma condição: você precisa quebrar essa montanha inteira. Inteira. Todos os blocos.</p>
       <p>Então você pegou sua picareta e começou a trabalhar.</p>
-      <button class="modal-btn btn-green" id="intro-start">COMEÇAR A CAVAR</button>
+      </div>
+            <button class="modal-btn btn-green" id="intro-start">COMEÇAR A CAVAR</button>
     </div>
   </div>
 
@@ -141,7 +150,8 @@
   <div class="overlay" id="settings-overlay">
     <div class="modal-panel">
       <h2>CONFIGURAÇÕES</h2>
-      <label><input type="checkbox" id="toggle-touch" checked> Mostrar controles de toque</label>
+      <label><input type="checkbox" id="toggle-touch"> Mostrar controles de toque</label>
+      <label><input type="checkbox" id="toggle-automine"> Minerar ao mirar (toque): sem precisar segurar o botão</label>
       <p style="font-size:14px;color:#c7a97a;text-align:center;">Mais opções em breve.</p>
       <button class="modal-btn btn-red" id="settings-close">VOLTAR</button>
     </div>
@@ -149,8 +159,9 @@
 
   <!-- CONTROLS -->
   <div class="overlay" id="controls-overlay">
-    <div class="modal-panel">
+    <div class="modal-panel has-list">
       <h2>CONTROLES</h2>
+<div id="controls-list">
       <ul>
         <li>Setas / A-D: mover para os lados</li>
         <li>Espaço / W / seta pra cima: pular</li>
@@ -158,19 +169,29 @@
         <li>E: interagir com as bancadas, triturador e baús</li>
         <li>Botão "Voltar à Superfície": retorna à base instantaneamente</li>
       </ul>
-      <button class="modal-btn btn-red" id="controls-close">VOLTAR</button>
+      <h2 style="font-size:14px;margin:14px 0 8px;">NO CELULAR</h2>
+      <ul>
+        <li>Joystick esquerdo: andar (quanto mais longe, mais rápido) · ▲ pula</li>
+        <li>Joystick direito: mirar a picareta (8 direções) · ⛏ segura para minerar</li>
+        <li>INTERAGIR (aparece perto das bancadas, triturador e baús)</li>
+        <li>Em Configurações dá para minerar direto ao mirar</li>
+      </ul>
+      </div>
+            <button class="modal-btn btn-red" id="controls-close">VOLTAR</button>
     </div>
   </div>
 
   <!-- VICTORY -->
   <div class="overlay" id="victory-overlay">
-    <div class="modal-panel">
+    <div class="modal-panel has-list">
       <h1>VOCÊ QUEBROU A MONTANHA INTEIRA!</h1>
+<div id="victory-list">
       <p>MrBeast vai adorar isso. Você atravessou a Pedra Escura e chegou às Profundezas, no fundo do mundo.<br>
       Dinheiro total: <b>R$ <span id="victory-money">0</span></b><br>
       Blocos minerados: <b><span id="victory-blocks">0</span></b></p>
       <p style="font-size:14px;color:#c7a97a;">Continue jogando — ainda há diamantes das Profundezas, baús raros e melhorias para buscar.</p>
-      <button class="modal-btn btn-green" id="victory-close">CONTINUAR MINERANDO</button>
+      </div>
+            <button class="modal-btn btn-green" id="victory-close">CONTINUAR MINERANDO</button>
     </div>
   </div>
 
@@ -199,7 +220,7 @@
 
   <!-- SAVE SLOTS -->
   <div class="overlay" id="slots-overlay">
-    <div class="modal-panel" style="max-width:520px;">
+    <div class="modal-panel has-list" style="max-width:520px;">
       <h2 id="slots-title">SALVAR / CARREGAR JOGO</h2>
       <div id="slots-list"></div>
       <button class="modal-btn btn-red" id="slots-back">VOLTAR</button>
